@@ -12,16 +12,16 @@
 :root{
   --bg:#eef1f6; --surface:#ffffff; --surface2:#e4e9f2; --ink:#0c1a36; --mute:#4f5f7d; --line:#c6cfdf;
   --gold:#9a7219; --gold2:#c9a24a; --on-gold:#0a1630; --stage:#dde4ef;
-  --ok:#1f8a5b; --warn:#a8701a; --bad:#c0473a;
+  --ok:#1f8a5b; --warn:#a8701a; --bad:#c0473a; --okbg:#e2f3ea; --badbg:#f8e3e0;
   --f-display:'Tajawal',system-ui,sans-serif; --f-body:'Tajawal',system-ui,sans-serif;
   --f-data:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0a1630; --surface:#12234a; --surface2:#1a3163; --ink:#eef2f8; --mute:#96a6c2; --line:#2a3f6c;
-  --gold:#c9a24a; --gold2:#e8c978; --on-gold:#0a1630; --stage:#0d1c3d; --ok:#55c08f; --warn:#e0b252; --bad:#e2705f; color-scheme:dark}}
+  --gold:#c9a24a; --gold2:#e8c978; --on-gold:#0a1630; --stage:#0d1c3d; --ok:#55c08f; --warn:#e0b252; --bad:#e2705f; --okbg:#173a2f; --badbg:#3d1f22; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0a1630; --surface:#12234a; --surface2:#1a3163; --ink:#eef2f8; --mute:#96a6c2; --line:#2a3f6c;
-  --gold:#c9a24a; --gold2:#e8c978; --on-gold:#0a1630; --stage:#0d1c3d; --ok:#55c08f; --warn:#e0b252; --bad:#e2705f; color-scheme:dark}
+  --gold:#c9a24a; --gold2:#e8c978; --on-gold:#0a1630; --stage:#0d1c3d; --ok:#55c08f; --warn:#e0b252; --bad:#e2705f; --okbg:#173a2f; --badbg:#3d1f22; color-scheme:dark}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);direction:rtl;overflow:hidden}
@@ -68,6 +68,17 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
 .side ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px}
 .side li{font-size:clamp(18px,1.6vw,28px);line-height:1.55;padding-right:22px;position:relative}
 .side li::before{content:"";position:absolute;right:0;top:.62em;width:10px;height:10px;background:var(--gold2);border-radius:2px}
+.quiz{display:flex;flex-direction:column;gap:10px}
+.opt{all:unset;box-sizing:border-box;width:100%;cursor:pointer;font-size:clamp(18px,1.6vw,26px);font-weight:700;padding:14px 18px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);line-height:1.45}
+.opt:hover:not(:disabled){border-color:var(--gold2)}
+.opt:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.qfb{font-weight:800;font-size:clamp(18px,1.5vw,24px);margin:4px 0 0}
+.qfb.ok{color:var(--ok)} .qfb.bad{color:var(--bad)}
+.qhint{color:var(--mute);font-size:clamp(16px,1.3vw,21px);line-height:1.7;margin:0}
+#bScore{color:var(--ink);font-weight:800}
 .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
 .legend span{font-size:15px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--mute);background:var(--surface)}
 .legend span.hl{background:var(--gold2);color:var(--on-gold);border-color:var(--gold2)}
@@ -153,6 +164,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
 <section id="board" class="view" hidden>
   <header class="pad">
     <select class="ttl lsel" id="bLesson" aria-label="اختيار الدرس"></select>
+    <span class="pill" id="bScore" hidden></span>
     <span class="pill">رمز الربط <span class="code ltr" id="bCode">----</span></span>
     <span class="pill"><span class="dot" id="bDot"></span><span id="bStatus">جارٍ التشغيل…</span></span>
     <button class="btn mini" id="bEdit">تعديل الدرس</button>
@@ -165,6 +177,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
       <div class="step" id="bStep">—</div>
       <h2 id="bSlideTitle">—</h2>
       <ul id="bPoints"></ul>
+      <div class="quiz" id="bQuiz" hidden></div>
       <div class="legend" id="bLegend"></div>
     </aside>
     <div class="stagebox">
@@ -367,21 +380,108 @@ const AIDL = {
      hotspots:[{label:'الاتصال بالإسعاف',a:'phone'},{label:'راقب التنفس',a:'head'}]}
   ]
 };
-const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}, {id:'marks', lesson:MARKS}, {id:'aid', lesson:AIDL}];
-const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', rifle:'سلاح تدريبي (قابل للتفكيك)', figure:'وضعية الرامي', sight:'صورة التصويب', aid:'مُسعف ومصاب', none:'بدون مجسّم'};
+const FORMS = {
+  title:'التشكيلات الميدانية',
+  slides:[
+    {title:'الرتل الفردي', model:'squad', pose:'file',
+     points:['أسهل تشكيل في السيطرة، وأسرعه في الحركة','مناسب للممرات الضيقة والرؤية المحدودة','قوة نارية محدودة للأمام، وجيدة نحو الجانبين'],
+     hotspots:[{label:'قائد المجموعة',a:'leader'},{label:'اتجاه الحركة',a:'dir'}]},
+    {title:'الرتل المزدوج', model:'squad', pose:'column',
+     points:['سيطرة جيدة وحركة سريعة على الطرق والمسارات','أقصر طولًا من الرتل الفردي','قوة نارية جيدة نحو الجانبين'],
+     hotspots:[{label:'قائد المجموعة',a:'leader'},{label:'الفريق أ',a:'teamA'},{label:'الفريق ب',a:'teamB'}]},
+    {title:'الخط', model:'squad', pose:'line',
+     points:['أقصى قوة نارية نحو الأمام','السيطرة فيه أصعب، والجانبان مكشوفان','يُستخدم عند الاقتراب من الهدف'],
+     hotspots:[{label:'قائد المجموعة',a:'leader'},{label:'جناح مكشوف',a:'flank'}]},
+    {title:'الإسفين', model:'squad', pose:'wedge',
+     points:['تشكيل متوازن: قوة نارية جيدة للأمام والجانبين','سيطرة جيدة ومرونة في التحول لتشكيل آخر','الأكثر استخدامًا في الأرض المفتوحة'],
+     hotspots:[{label:'رأس الإسفين',a:'front'},{label:'قائد المجموعة',a:'leader'},{label:'الجناح',a:'flank'}]},
+    {title:'المسافات والإشارات', model:'squad', pose:'wedge',
+     points:['المسافة بين الأفراد حسب الأرض والرؤية','كل فرد يرى قائد فريقه في كل الأوقات','الإشارات باليد للتواصل بصمت أثناء الحركة'],
+     hotspots:[{label:'قائد المجموعة',a:'leader'}]},
+    {title:'أي تشكيل يعطي أقصى قوة نارية للأمام؟', model:'squad', pose:'column', points:[], hotspots:[],
+     quiz:{kind:'choice', options:['الخط','الرتل الفردي','الرتل المزدوج','الإسفين'], answer:0}},
+    {title:'أي تشكيل أنسب للممرات الضيقة والرؤية المحدودة؟', model:'squad', pose:'line', points:[], hotspots:[],
+     quiz:{kind:'choice', options:['الخط','الرتل الفردي','الإسفين'], answer:1}},
+    {title:'أشر إلى قائد المجموعة', model:'squad', pose:'wedge', points:[],
+     hotspots:[{label:'رأس الإسفين',a:'front'},{label:'قائد المجموعة',a:'leader'},{label:'الجناح',a:'flank'}], quiz:{kind:'find', answer:1}}
+  ]
+};
+const NAV = {
+  title:'تحديد الاتجاه بدون بوصلة',
+  slides:[
+    {title:'طريقة ظل العصا', model:'shadow', pose:'sun',
+     points:['الشمس تتحرك من الشرق إلى الغرب، فيتحرك الظل عكسها','ثبّت عصا مستقيمة طولها نحو متر في أرض مستوية','راقب طرف الظل: يتحرك من الغرب نحو الشرق'],
+     hotspots:[{label:'العصا',a:'stick'}]},
+    {title:'العلامتان', model:'shadow', pose:'marks',
+     points:['ضع حجرًا عند طرف الظل: هذه العلامة الأولى (الغرب)','انتظر 15 دقيقة على الأقل، ثم ضع حجرًا عند الطرف الجديد: العلامة الثانية (الشرق)','الخط بين العلامتين يمثّل اتجاه غرب–شرق'],
+     hotspots:[{label:'العلامة الأولى: غرب',a:'m1'},{label:'العلامة الثانية: شرق',a:'m2'},{label:'الشمس',a:'sun'}]},
+    {title:'تحديد الشمال', model:'shadow', pose:'north',
+     points:['قف والعلامة الأولى على يسارك والثانية على يمينك','أنت الآن تواجه الشمال تقريبًا','كلما طالت المدة بين العلامتين زادت الدقة'],
+     hotspots:[{label:'الشمال',a:'north'},{label:'غرب',a:'m1'},{label:'شرق',a:'m2'}]},
+    {title:'النجم القطبي', model:'nightsky', pose:'dipper',
+     points:['النجم القطبي يكاد لا يتحرك، ويدل على الشمال','ابحث أولًا عن الدب الأكبر (شكل المغرفة)','ارتفاعه فوق الأفق يساوي تقريبًا خط عرض مكانك: نحو 26° في الدمام'],
+     hotspots:[{label:'النجم القطبي',a:'polaris'},{label:'الدب الأكبر',a:'dipper'},{label:'الارتفاع ≈ 26°',a:'alt'}]},
+    {title:'نجما الدليل', model:'nightsky', pose:'pointer',
+     points:['امدد خطًا من النجمين في طرف المغرفة','نحو خمسة أضعاف المسافة بينهما','تصل إلى النجم القطبي، وتحته مباشرة جهة الشمال على الأفق'],
+     hotspots:[{label:'نجما الدليل',a:'pointers'},{label:'النجم القطبي',a:'polaris'},{label:'الشمال',a:'north'}]},
+    {title:'دوران السماء', model:'nightsky', pose:'rotate',
+     points:['النجوم تدور حول النجم القطبي عكس عقارب الساعة','الدب الأكبر وذات الكرسي متقابلان دائمًا حوله','إذا كان أحدهما قريبًا من الأفق فاستعن بالآخر'],
+     hotspots:[{label:'النجم القطبي (ثابت)',a:'polaris'},{label:'الشمال',a:'north'}]},
+    {title:'العلامة الأولى لطرف الظل تمثّل:', model:'shadow', pose:'sun', points:[], hotspots:[],
+     quiz:{kind:'choice', options:['الغرب','الشرق','الشمال','الجنوب'], answer:0}},
+    {title:'أشر إلى النجم القطبي', model:'nightsky', pose:'plain', points:[],
+     hotspots:[{label:'الدب الأكبر',a:'dipper'},{label:'ذات الكرسي',a:'cass'},{label:'النجم القطبي',a:'polaris'},{label:'نجما الدليل',a:'pointers'}], quiz:{kind:'find', answer:2}},
+    {title:'ارتفاع النجم القطبي فوق الأفق في الدمام تقريبًا:', model:'nightsky', pose:'rotate', points:[], hotspots:[],
+     quiz:{kind:'choice', options:['10°','26°','45°','90°'], answer:1}}
+  ]
+};
+SAMPLE.slides.push(
+  {title:'أشر إلى السرج', model:'terrain', points:[], hotspots:[{label:'قمة',a:'peakA'},{label:'سرج',a:'saddle'},{label:'لسان',a:'spur'},{label:'وادٍ',a:'valley'}], quiz:{kind:'find', answer:1}},
+  {title:'تقارب خطوط الكنتور يعني:', model:'terrain', points:[], hotspots:[], quiz:{kind:'choice', options:['انحدار حاد','أرض مستوية','وادٍ عميق'], answer:0}},
+  {title:'كم ميليم في الدائرة الكاملة؟', model:'compass', points:[], hotspots:[], quiz:{kind:'choice', options:['360','1000','3600','6400'], answer:3}}
+);
+FIRE.slides.push(
+  {title:'أشر إلى مسمار الأمان', model:'extinguisher', points:[], hotspots:[{label:'مقياس الضغط',a:'gauge'},{label:'مسمار الأمان',a:'pin'},{label:'الفوهة',a:'nozzle'},{label:'المقبض',a:'handle'}], quiz:{kind:'find', answer:1}},
+  {title:'أين توجّه فوهة الطفاية؟', model:'extinguisher', points:[], hotspots:[], quiz:{kind:'choice', options:['إلى أعلى اللهب','إلى قاعدة النار','إلى الدخان'], answer:1}},
+  {title:'متى تكون الطفاية جاهزة للاستخدام؟', model:'extinguisher', points:[], hotspots:[], quiz:{kind:'choice', options:['المؤشر في المنطقة الحمراء','مسمار الأمان منزوع','المؤشر في المنطقة الخضراء'], answer:2}}
+);
+MARKS.slides.push(
+  {title:'أشر إلى مفتاح الأمان', model:'rifle', points:[], hotspots:[{label:'الزناد',a:'trigger'},{label:'المخزن',a:'mag'},{label:'مفتاح الأمان',a:'safety'},{label:'الأخمص',a:'stock'}], quiz:{kind:'find', answer:2}},
+  {title:'أثبت أوضاع الرماية هو:', model:'figure', pose:'kneeling', points:[], hotspots:[], quiz:{kind:'choice', options:['الوقوف','الجثو','الانبطاح'], answer:2}},
+  {title:'في صورة التصويب الصحيحة تركّز عينك على:', model:'sight', points:[], hotspots:[], quiz:{kind:'choice', options:['الهدف','رأس الشعيرة','الحلقة الخلفية'], answer:1}},
+  {title:'الضغط على الزناد يكون:', model:'figure', pose:'prone', points:[], hotspots:[], quiz:{kind:'choice', options:['ضغطًا بطيئًا مستمرًا','نترًا سريعًا','مع إغماض العين'], answer:0}}
+);
+AIDL.slides.push(
+  {title:'أشر إلى الرباط الضاغط', model:'aid', pose:'tourniquet', points:[], hotspots:[{label:'الجرح',a:'wound'},{label:'الرباط الضاغط',a:'tq'},{label:'الرأس',a:'head'}], quiz:{kind:'find', answer:1}},
+  {title:'معدل ضغطات الإنعاش في الدقيقة:', model:'aid', pose:'assess', points:[], hotspots:[], quiz:{kind:'choice', options:['60 إلى 80','100 إلى 120','140 إلى 160'], answer:1}},
+  {title:'أين يوضع الرباط الضاغط؟', model:'aid', pose:'pressure', points:[], hotspots:[], quiz:{kind:'choice', options:['على الجرح مباشرة','من 5 إلى 7 سم فوق الجرح','تحت الجرح','على المفصل'], answer:1}},
+  {title:'مصاب يتنفس لكنه فاقد الوعي، تضعه في:', model:'aid', pose:'assess', points:[], hotspots:[], quiz:{kind:'choice', options:['وضعية الجلوس','على بطنه','وضعية الإفاقة'], answer:2}}
+);
+const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}, {id:'marks', lesson:MARKS}, {id:'aid', lesson:AIDL}, {id:'forms', lesson:FORMS}, {id:'nav', lesson:NAV}];
+const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', rifle:'سلاح تدريبي (قابل للتفكيك)', figure:'وضعية الرامي', sight:'صورة التصويب', aid:'مُسعف ومصاب', squad:'مجموعة أفراد (تشكيلات)', shadow:'ظل العصا والشمس', nightsky:'سماء الليل', none:'بدون مجسّم'};
+const FORM_NAMES = {file:'الرتل الفردي', column:'الرتل المزدوج', line:'الخط', wedge:'الإسفين'};
+const SHADOW_NAMES = {sun:'حركة الشمس والظل', marks:'العلامتان', north:'تحديد الشمال'};
+const SKY_NAMES = {dipper:'الدب الأكبر', pointer:'نجما الدليل', rotate:'دوران السماء', plain:'بدون إرشادات (للأسئلة)'};
 const AID_NAMES = {assess:'تقييم المصاب', pressure:'ضغط مباشر على الجرح', tourniquet:'الرباط الضاغط', recovery:'وضعية الإفاقة', cpr:'الإنعاش القلبي (مستمر)', cpr30:'الإنعاش 30:2 مع العدّاد', evac:'طلب الإسعاف'};
 const POSE_NAMES = {standing:'الوقوف', kneeling:'الجثو', prone:'الانبطاح'};
-const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}, rifle:{y:0.04,h:0.45,d:1.2,xr:0.75}, figure:{y:0.26,h:0.32,d:1.6,xr:0.7}, sight:{y:0.28,h:0.12,d:1.22,xr:0.8}, aid:{y:0.14,h:0.5,d:1.35,xr:0.75}};
+const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}, rifle:{y:0.04,h:0.45,d:1.2,xr:0.75}, figure:{y:0.26,h:0.32,d:1.6,xr:0.7}, sight:{y:0.28,h:0.12,d:1.22,xr:0.8}, aid:{y:0.14,h:0.5,d:1.35,xr:0.75}, squad:{y:0.0,h:0.85,d:1.15,xr:0.8}, shadow:{y:-0.02,h:1.15,d:1.12,xr:0.8}, nightsky:{y:0.22,h:0.12,d:1.25,xr:0.65}};
+function sceneNames(model){ return {figure:POSE_NAMES, aid:AID_NAMES, squad:FORM_NAMES, shadow:SHADOW_NAMES, nightsky:SKY_NAMES}[model]||null; }
 
 function validLesson(L){
   return L && typeof L==='object' && Array.isArray(L.slides) && L.slides.length>0 &&
     L.slides.every(s=>s && typeof s.title==='string' && Array.isArray(s.points));
 }
+function normQuiz(q){
+  if(!q||typeof q!=='object') return null;
+  if(q.kind==='choice'){ const o=(q.options||[]).map(String).map(x=>x.trim()).filter(Boolean); if(o.length<2) return null; return {kind:'choice', options:o, answer:Math.max(0,Math.min(o.length-1,q.answer|0))}; }
+  if(q.kind==='find') return {kind:'find', answer:Math.max(0,q.answer|0)};
+  return null;
+}
 function normalizeLesson(L){
   const out = {title: String(L.title||'درس بدون عنوان'), slides:[]};
   L.slides.forEach(s=>{
     out.slides.push({
-      title:String(s.title||''), model: MODEL_NAMES[s.model]?s.model:'none', explode:!!s.explode, pose: (POSE_NAMES[s.pose]||AID_NAMES[s.pose])?s.pose:'standing',
+      title:String(s.title||''), model: MODEL_NAMES[s.model]?s.model:'none', explode:!!s.explode, pose: (POSE_NAMES[s.pose]||AID_NAMES[s.pose]||FORM_NAMES[s.pose]||SHADOW_NAMES[s.pose]||SKY_NAMES[s.pose])?s.pose:'standing', quiz: normQuiz(s.quiz),
       points:(s.points||[]).map(String).filter(x=>x.trim()),
       hotspots:(Array.isArray(s.hotspots)?s.hotspots:[]).filter(h=>h&&(h.a||Array.isArray(h.p))).map(h=>h.a?{label:String(h.label||''),a:String(h.a)}:{label:String(h.label||''),p:h.p.slice(0,3).map(Number)})
     });
@@ -409,6 +509,19 @@ const ANCHORS = {
   aid:function(slide,k){ const sc=AID[slide.pose]||AID.assess, C=CAS[sc.c], R=RES[sc.r]; const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2,-(a[2]+b[2])/2];
     const m={wound:[0.2,0.15,0.11], tq:[0.05,0.17,0.1], hands:mid(R.hL,R.hR), shoulders:mid(R.sL,R.sR), chest:C.chest, head:C.head, phone:[R.chest[0],R.chest[1]-0.15,-R.chest[2]], shoulderC:[C.sR[0],C.sR[1]+0.04,C.sR[2]], cheek:C.hR, knee:C.kneeR, forehead:[C.head[0],C.head[1]+0.08,C.head[2]]};
     const v=aidP(m[k]||C.chest); return [v.x, v.y+0.03, v.z]; },
+  squad:function(slide,k){ const F=FORM[slide.pose]||FORM.file; let p;
+    if(k==='dir') return [0,0.0,-0.5];
+    if(k==='leader') p=F[0]; else if(k==='teamA') p=F[1]; else if(k==='teamB') p=F[5];
+    else if(k==='front') p=F.reduce((a,b)=>b[1]<a[1]?b:a);
+    else if(k==='flank') p=F.slice(1).reduce((a,b)=>Math.abs(b[0])>Math.abs(a[0])?b:a);
+    p=p||F[0]; return [p[0],0.15,p[1]]; },
+  shadow:function(slide,k){ const m1=shadowTip(T1), m2=shadowTip(T2), sd=sunAt(T2).dir;
+    const mx=(m1[0]+m2[0])/2, mz=(m1[1]+m2[1])/2, dx=m2[0]-m1[0], dz=m2[1]-m1[1], dl=Math.hypot(dx,dz)||1, nx=dz/dl, nz=-dx/dl;
+    const m={stick:[0,SH_H-0.04,0], m1:[m1[0],-0.025,m1[1]], m2:[m2[0],-0.025,m2[1]], sun:[sd.x*0.6,sd.y*0.6-0.04,sd.z*0.6], north:[mx+nx*0.3,-0.02,mz+nz*0.3]};
+    return m[k]||m.stick; },
+  nightsky:function(slide,k){ const p=(uv)=>{ const q=skyXY(uv,TH0); return [q[0],q[1],0.016]; };
+    const m={polaris:[POL[0],POL[1],0.016], pointers:p([31.4,0]), dipper:p([31,12]), cass:p([-28,0]), north:[0,0.02,0.06], alt:[0,0.1,0.016]};
+    return m[k]||m.polaris; },
   sight:{ok:[0.32,0.36,0.012], high:[0,0.36,0.012], side:[-0.32,0.36,0.012]},
   none:{}
 };
@@ -704,7 +817,110 @@ function buildSight(){
   const leg=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.04,0.04), new THREE.MeshStandardMaterial({color:0xc9a24a})); leg.position.set(0,-0.03,0); g.add(leg);
   return g;
 }
-function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): type==='rifle'?buildRifle(): type==='figure'?buildFigure(): type==='sight'?buildSight(): type==='aid'?buildAid(): new THREE.Group(); }
+/* ---------- squad formations ---------- */
+const FORM={
+  file:[[0,0],[0,-0.4],[0,-0.3],[0,-0.2],[0,-0.1],[0,0.1],[0,0.2],[0,0.3],[0,0.4]],
+  column:[[0,-0.12],[-0.09,-0.3],[-0.09,-0.18],[-0.09,-0.06],[-0.09,0.06],[0.09,-0.3],[0.09,-0.18],[0.09,-0.06],[0.09,0.06]],
+  line:[[0,0.12],[-0.4,0],[-0.3,0],[-0.2,0],[-0.1,0],[0.1,0],[0.2,0],[0.3,0],[0.4,0]],
+  wedge:[[0,-0.05],[0,-0.32],[-0.09,-0.22],[0.09,-0.22],[-0.18,-0.12],[0.18,-0.12],[-0.27,-0.02],[0.27,-0.02],[0.36,0.08]]
+};
+function buildSquad(){
+  const g=new THREE.Group();
+  const gt=canvasTex(512,512,(x,W,Hh)=>{ x.fillStyle='#b9a57b'; x.fillRect(0,0,W,Hh); for(let i=0;i<160;i++){ x.fillStyle='rgba(110,90,55,'+(0.12+Math.random()*0.2)+')'; x.beginPath(); x.arc(Math.random()*W,Math.random()*Hh,2+Math.random()*5,0,7); x.fill(); } x.strokeStyle='rgba(80,62,36,.28)'; x.lineWidth=2; for(let i=0;i<=8;i++){ x.beginPath(); x.moveTo(0,i*Hh/8); x.lineTo(W,i*Hh/8); x.stroke(); x.beginPath(); x.moveTo(i*W/8,0); x.lineTo(i*W/8,Hh); x.stroke(); } });
+  gt.wrapS=gt.wrapT=THREE.RepeatWrapping;
+  const top=new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshStandardMaterial({map:gt, roughness:1})); top.rotation.x=-Math.PI/2; top.position.y=-0.04; g.add(top);
+  const base=new THREE.Mesh(new THREE.BoxGeometry(1,0.03,1), new THREE.MeshStandardMaterial({color:0x12234a})); base.position.y=-0.056; g.add(base);
+  const gold=new THREE.MeshStandardMaterial({color:0xc9a24a, metalness:.4, roughness:.4});
+  const arrow=new THREE.Mesh(new THREE.ConeGeometry(0.035,0.08,3), gold); arrow.rotation.x=-Math.PI/2; arrow.position.set(0,-0.025,-0.47); g.add(arrow);
+  const cloth=new THREE.MeshStandardMaterial({color:0x8a7f58, roughness:.85});
+  const helA=new THREE.MeshStandardMaterial({color:0x56653a, roughness:.7}), helB=new THREE.MeshStandardMaterial({color:0x3f5a78, roughness:.7});
+  const gun=new THREE.MeshStandardMaterial({color:0x1b1e24, roughness:.6});
+  const men=[];
+  for(let i=0;i<9;i++){
+    const m=new THREE.Group(); m.position.y=-0.04;
+    const torso=new THREE.Mesh(new THREE.CylinderGeometry(0.019,0.023,0.08,10), cloth); torso.position.y=0.1; m.add(torso);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(0.019,14,10), i===0?gold:(i<5?helA:helB)); head.position.y=0.162; m.add(head);
+    const legs=[-1,1].map(sd=>{ const pv=new THREE.Group(); pv.position.set(sd*0.011,0.062,0); const l=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.062,8), cloth); l.position.y=-0.031; pv.add(l); m.add(pv); return pv; });
+    const r=new THREE.Mesh(new THREE.BoxGeometry(0.008,0.008,0.085), gun); r.position.set(0.022,0.105,-0.022); r.rotation.x=0.35; m.add(r);
+    g.add(m); men.push({m,legs,cur:new THREE.Vector2(),tgt:new THREE.Vector2()});
+  }
+  g.userData.setPose=(name,snap)=>{ const F=FORM[name]||FORM.file; men.forEach((o,i)=>{ o.tgt.set(F[i][0],F[i][1]); if(snap) o.cur.copy(o.tgt); o.m.position.x=o.cur.x; o.m.position.z=o.cur.y; }); };
+  g.userData.tick=(t)=>{
+    gt.offset.y=(gt.offset.y+0.0015)%1;
+    men.forEach((o,i)=>{ o.cur.lerp(o.tgt,0.045); const ph=Math.sin(t*0.009+i*0.8); o.m.position.set(o.cur.x,-0.04+Math.abs(ph)*0.004,o.cur.y); o.legs[0].rotation.x=ph*0.5; o.legs[1].rotation.x=-ph*0.5; });
+  };
+  return g;
+}
+/* ---------- stick-shadow method ---------- */
+const SH_H=0.34, T1=0.3, T2=0.6;
+function sunAt(ts){ const az=(90+180*ts)*Math.PI/180, el=Math.sin(Math.PI*ts)*62*Math.PI/180; return {dir:new THREE.Vector3(Math.sin(az)*Math.cos(el), Math.sin(el), -Math.cos(az)*Math.cos(el)), el}; }
+function shadowTip(ts){ const s=sunAt(ts), hx=-s.dir.x, hz=-s.dir.z, hl=Math.hypot(hx,hz)||1, L=Math.min(0.42, SH_H/Math.tan(Math.max(0.05,s.el))); return [hx/hl*L, hz/hl*L]; }
+function buildShadow(){
+  const g=new THREE.Group();
+  const disc=new THREE.Mesh(new THREE.CylinderGeometry(0.47,0.47,0.02,64), new THREE.MeshStandardMaterial({color:0xb4955e, roughness:1})); disc.position.y=-0.05; g.add(disc);
+  const stick=new THREE.Mesh(new THREE.CylinderGeometry(0.007,0.009,SH_H,10), new THREE.MeshStandardMaterial({color:0x6b4a2b, roughness:.8})); stick.position.y=-0.04+SH_H/2; g.add(stick);
+  const sun=new THREE.Mesh(new THREE.SphereGeometry(0.035,20,14), new THREE.MeshBasicMaterial({color:0xffd257})); g.add(sun);
+  const arc=[]; for(let i=0;i<=40;i++){ const d=sunAt(i/40).dir; arc.push(new THREE.Vector3(d.x*0.6,d.y*0.6-0.04,d.z*0.6)); }
+  const arcL=new THREE.Line(new THREE.BufferGeometry().setFromPoints(arc), new THREE.LineDashedMaterial({color:0xe8c978, dashSize:0.02, gapSize:0.015})); arcL.computeLineDistances(); arcL.raycast=noRay; g.add(arcL);
+  const shadow=new THREE.Mesh(new THREE.BoxGeometry(1,0.002,0.014), new THREE.MeshBasicMaterial({color:0x2e2418, transparent:true, opacity:.75})); shadow.position.y=-0.0385; g.add(shadow);
+  const stoneM=new THREE.MeshStandardMaterial({color:0x5b5f66, roughness:.9});
+  const m1=shadowTip(T1), m2=shadowTip(T2);
+  const s1=new THREE.Mesh(new THREE.SphereGeometry(0.016,12,8), stoneM); s1.position.set(m1[0],-0.032,m1[1]); g.add(s1);
+  const s2=new THREE.Mesh(new THREE.SphereGeometry(0.016,12,8), stoneM); s2.position.set(m2[0],-0.032,m2[1]); g.add(s2);
+  const dx=m2[0]-m1[0], dz=m2[1]-m1[1], dl=Math.hypot(dx,dz);
+  const ew=new THREE.Mesh(new THREE.BoxGeometry(dl*2.4,0.003,0.006), new THREE.MeshBasicMaterial({color:0xc0473a})); ew.position.set((m1[0]+m2[0])/2,-0.037,(m1[1]+m2[1])/2); ew.rotation.y=-Math.atan2(dz,dx); g.add(ew);
+  const nx=dz/dl, nz=-dx/dl, mx=(m1[0]+m2[0])/2, mz=(m1[1]+m2[1])/2;
+  const north=new THREE.Group();
+  const shaft=new THREE.Mesh(new THREE.BoxGeometry(0.008,0.004,0.26), new THREE.MeshBasicMaterial({color:0xc9a24a})); shaft.position.z=-0.13; north.add(shaft);
+  const head=new THREE.Mesh(new THREE.ConeGeometry(0.025,0.06,3), new THREE.MeshBasicMaterial({color:0xc9a24a})); head.rotation.x=-Math.PI/2; head.position.z=-0.29; north.add(head);
+  north.position.set(mx,-0.034,mz); north.rotation.y=Math.atan2(-nx,-nz); g.add(north);
+  const lt=canvasTex(512,512,(x,W)=>{ x.clearRect(0,0,W,W); x.font='800 64px '+FONT; x.textAlign='center'; x.textBaseline='middle'; x.fillStyle='#0a1630'; x.fillText('ش',W/2,48); x.fillText('ج',W/2,W-48); x.fillText('ق',W-48,W/2); x.fillText('غ',48,W/2); });
+  const letters=new THREE.Mesh(new THREE.PlaneGeometry(0.9,0.9), new THREE.MeshBasicMaterial({map:lt, transparent:true})); letters.rotation.x=-Math.PI/2; letters.position.y=-0.0385; letters.raycast=noRay; g.add(letters);
+  let mode='sun';
+  g.userData.setPose=(name)=>{ mode=SHADOW_NAMES[name]?name:'sun'; const on=mode!=='sun'; s1.visible=s2.visible=ew.visible=on; north.visible=letters.visible=mode==='north'; };
+  g.userData.tick=(t)=>{
+    const ts = mode==='sun' ? 0.08+((t/7000)%1)*0.84 : T2;
+    const d=sunAt(ts).dir; sun.position.set(d.x*0.6,d.y*0.6-0.04,d.z*0.6);
+    const tip=shadowTip(ts), L=Math.hypot(tip[0],tip[1]); shadow.scale.x=L; shadow.position.set(tip[0]/2,-0.0385,tip[1]/2); shadow.rotation.y=-Math.atan2(tip[1],tip[0]);
+  };
+  return g;
+}
+/* ---------- night sky: Polaris, Big Dipper, Cassiopeia ---------- */
+const SK=0.0077, POL=[0,0.2], TH0=2.6;
+const DIP=[[28.7,0],[34.1,0],[34.5,8],[29.5,9.5],[30.5,16],[32,21.5],[37,26]];
+const CASS=[[-29,-8],[-26,-3.5],[-30,0.5],[-27,4.5],[-31,8.5]];
+function skyXY(uv,th){ const c=Math.cos(th), s=Math.sin(th); return [POL[0]+(uv[0]*c-uv[1]*s)*SK, POL[1]+(uv[0]*s+uv[1]*c)*SK]; }
+function buildNight(){
+  const g=new THREE.Group();
+  const st=canvasTex(1024,640,(x,W,Hh)=>{ const gr=x.createLinearGradient(0,0,0,Hh); gr.addColorStop(0,'#050b1c'); gr.addColorStop(1,'#14284f'); x.fillStyle=gr; x.fillRect(0,0,W,Hh); for(let i=0;i<260;i++){ x.fillStyle='rgba(255,255,255,'+(0.15+Math.random()*0.45)+')'; x.beginPath(); x.arc(Math.random()*W,Math.random()*Hh,Math.random()*1.6+0.3,0,7); x.fill(); } });
+  const sky=new THREE.Mesh(new THREE.PlaneGeometry(1.0,0.62), new THREE.MeshBasicMaterial({map:st})); sky.position.set(0,0.26,0); g.add(sky);
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(1.04,0.66,0.01), new THREE.MeshStandardMaterial({color:0x12234a})); frame.position.set(0,0.26,-0.007); g.add(frame);
+  const ground=new THREE.Mesh(new THREE.BoxGeometry(1.06,0.16,0.07), new THREE.MeshStandardMaterial({color:0x3b3324, roughness:1})); ground.position.set(0,-0.07,0.035); g.add(ground);
+  const nm=new THREE.Mesh(new THREE.ConeGeometry(0.02,0.04,3), new THREE.MeshBasicMaterial({color:0xc9a24a})); nm.position.set(0,0.03,0.05); g.add(nm);
+  const starM=new THREE.MeshBasicMaterial({color:0xf4f1ea});
+  const mk=(r,m)=>{ const o=new THREE.Mesh(new THREE.SphereGeometry(r,12,8),m||starM); o.position.z=0.016; g.add(o); return o; };
+  const pol=mk(0.013,new THREE.MeshBasicMaterial({color:0xfff0b8})); pol.position.set(POL[0],POL[1],0.016);
+  const halo=new THREE.Mesh(new THREE.RingGeometry(0.02,0.024,32), new THREE.MeshBasicMaterial({color:0xe8c978, transparent:true})); halo.position.set(POL[0],POL[1],0.017); halo.raycast=noRay; g.add(halo);
+  const dip=DIP.map(()=>mk(0.009)), cas=CASS.map(()=>mk(0.008));
+  const lineM=new THREE.LineBasicMaterial({color:0x7f9cc9, transparent:true, opacity:.7});
+  const dipL=new THREE.LineSegments(new THREE.BufferGeometry(), lineM); dipL.raycast=noRay; g.add(dipL);
+  const casL=new THREE.Line(new THREE.BufferGeometry(), lineM); casL.raycast=noRay; g.add(casL);
+  const ptr=new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({color:0xe8c978, dashSize:0.015, gapSize:0.01})); ptr.raycast=noRay; g.add(ptr);
+  const alt=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0.01,0.016),new THREE.Vector3(POL[0],POL[1]-0.02,0.016)]), new THREE.LineDashedMaterial({color:0xe8c978, dashSize:0.01, gapSize:0.008})); alt.computeLineDistances(); alt.raycast=noRay; g.add(alt);
+  let mode='dipper', lastTh=null;
+  const V=(xy)=>new THREE.Vector3(xy[0],xy[1],0.016);
+  function place(th){
+    const dp=DIP.map(uv=>skyXY(uv,th)), cp=CASS.map(uv=>skyXY(uv,th));
+    dp.forEach((p,i)=>dip[i].position.set(p[0],p[1],0.016)); cp.forEach((p,i)=>cas[i].position.set(p[0],p[1],0.016));
+    const seg=[[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]]; const pts=[]; seg.forEach(([a,b])=>{ pts.push(V(dp[a]),V(dp[b])); });
+    dipL.geometry.setFromPoints(pts); casL.geometry.setFromPoints(cp.map(V));
+    ptr.geometry.setFromPoints([V(dp[1]),V(POL)]); ptr.computeLineDistances();
+  }
+  g.userData.setPose=(name)=>{ mode=SKY_NAMES[name]?name:'dipper'; ptr.visible=mode==='pointer'; alt.visible=mode==='dipper'; halo.visible=mode!=='plain'; lastTh=null; };
+  g.userData.tick=(t)=>{ const th = mode==='rotate' ? TH0+(t/1000)*0.35 : TH0; if(th!==lastTh){ place(th); lastTh=th; } halo.scale.setScalar(1+0.25*Math.sin(t/300)); };
+  return g;
+}
+function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): type==='rifle'?buildRifle(): type==='figure'?buildFigure(): type==='sight'?buildSight(): type==='aid'?buildAid(): type==='squad'?buildSquad(): type==='shadow'?buildShadow(): type==='nightsky'?buildNight(): new THREE.Group(); }
 
 function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function labelTexture(text, hl){
@@ -731,7 +947,7 @@ function buildHotspots(slide){
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:n.t, depthTest:false, transparent:true}));
     const lh=0.055; sp.scale.set(lh*n.aspect, lh, 1); sp.position.y=up+lh/2; sp.renderOrder=30; sp.raycast=noRay;
     grp.add(dot,hit,line,sp);
-    list.push({grp, dot, hit, sp, tex:[n.t,hlt.t], base, part});
+    list.push({grp, dot, hit, sp, line, tex:[n.t,hlt.t], base, part});
   });
   return list;
 }
@@ -807,7 +1023,11 @@ function fillLessonSelect(sel, cur){
   sel.textContent=''; libraryIds().forEach(id=>{ const o=document.createElement('option'); o.value=id; o.textContent=lessonById(id).title; sel.appendChild(o); }); sel.value=cur;
 }
 let curId = store.get('sharh.cur','map'); if(!libraryIds().includes(curId)) curId='map';
-const S = { lesson: lessonById(curId), i:0, hl:-1 };
+const S = { lesson: lessonById(curId), i:0, hl:-1, ans:{} };
+function quizOf(sl){ return (sl&&sl.quiz)||null; }
+function hideFind(i){ const q=quizOf(S.lesson.slides[i]); return !!(q&&q.kind==='find'&&S.ans[i]==null); }
+function scoreInfo(){ let t=0,c=0,a=0; S.lesson.slides.forEach((sl,i)=>{ if(sl.quiz){ t++; if(S.ans[i]!=null){ a++; if(S.ans[i]===sl.quiz.answer) c++; } } }); return {t,c,a}; }
+function rightLabel(sl){ const q=sl.quiz; return q.kind==='choice'? q.options[q.answer] : ((sl.hotspots[q.answer]||{}).label||''); }
 
 /* Helper that owns a model group + hotspots inside a parent */
 function makeRig(parent){
@@ -818,7 +1038,7 @@ function makeRig(parent){
   const halo=new THREE.Mesh(new THREE.RingGeometry(0.03,0.04,32), new THREE.MeshBasicMaterial({color:0xe8c978, side:THREE.DoubleSide, transparent:true, depthTest:false}));
   halo.renderOrder=40; halo.raycast=noRay; pm.add(halo); pm.visible=false; rig.pointer=pm; rig.halo=halo;
   rig.root.add(pm);
-  rig.load = function(slide){
+  rig.load = function(slide, hide){
     let fresh=false;
     if(slide.model!==rig.type){
       if(rig.model){ rig.root.remove(rig.model); disposeTree(rig.model); }
@@ -829,7 +1049,7 @@ function makeRig(parent){
     rig.exp = slide.explode?1:0; if(fresh) rig.expCur=rig.exp;
     if(rig.model.userData.setPose) rig.model.userData.setPose(slide.pose||'standing', fresh);
     rig.hs.forEach(h=>{ rig.root.remove(h.grp); h.grp.traverse(c=>{ if(c.geometry) c.geometry.dispose(); }); h.tex.forEach(t=>t.dispose()); h.sp.material.dispose(); });
-    rig.hs = buildHotspots(slide); rig.hs.forEach(h=>rig.root.add(h.grp));
+    rig.hs = buildHotspots(slide); rig.hs.forEach(h=>{ rig.root.add(h.grp); if(hide){ h.sp.visible=false; h.line.visible=false; } });
     rig.hits = rig.hs.map(h=>h.hit);
     rig.meshes=[]; rig.model.traverse(c=>{ if(c.isMesh) rig.meshes.push(c); });
     rig.setHL(-1);
@@ -845,6 +1065,7 @@ function makeRig(parent){
     const st=M.userData.status||''; if(st!==rig.status){ rig.status=st; if(rig.onStatus) rig.onStatus(st); }
     if(M.userData.needle) M.userData.needle.rotation.y=Math.sin(t/900)*0.06;
   };
+  rig.reveal = function(){ rig.hs.forEach(h=>{ h.sp.visible=true; h.line.visible=true; }); };
   rig.setHL = function(i){ rig.hs.forEach((h,k)=>{ const on=k===i; h.sp.material.map=h.tex[on?1:0]; h.sp.material.needsUpdate=true; h.dot.scale.setScalar(on?1.8:1); }); };
   return rig;
 }
@@ -899,12 +1120,22 @@ function startBoard(){
   function renderSide(){
     const L=S.lesson, sl=L.slides[S.i];
     const lsel=$('#bLesson'); if(lsel.value!==curId || !lsel.selectedOptions[0] || lsel.selectedOptions[0].textContent!==L.title) fillLessonSelect(lsel,curId);
-    $('#bStep').textContent='الخطوة '+(S.i+1)+' من '+L.slides.length;
+    const q=quizOf(sl);
+    $('#bStep').textContent=(q?'سؤال · ':'')+'الخطوة '+(S.i+1)+' من '+L.slides.length;
     $('#bSlideTitle').textContent=sl.title;
     const ul=$('#bPoints'); ul.textContent='';
     sl.points.forEach(p=>{ const li=document.createElement('li'); li.textContent=p; ul.appendChild(li); });
     const lg=$('#bLegend'); lg.textContent='';
-    (sl.hotspots||[]).forEach((h,k)=>{ const s=document.createElement('span'); s.textContent=h.label; if(k===S.hl) s.className='hl'; lg.appendChild(s); });
+    if(!hideFind(S.i)) (sl.hotspots||[]).forEach((h,k)=>{ const s=document.createElement('span'); s.textContent=h.label; if(k===S.hl) s.className='hl'; lg.appendChild(s); });
+    const qb=$('#bQuiz'); qb.textContent=''; qb.hidden=!q;
+    if(q){
+      const pk=S.ans[S.i];
+      if(q.kind==='choice') q.options.forEach((o,k)=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=o; if(pk!=null){ b.disabled=true; if(k===q.answer) b.classList.add('ok'); else if(k===pk) b.classList.add('bad'); } b.addEventListener('click',()=>boardAnswer(S.i,k)); qb.appendChild(b); });
+      else if(pk==null){ const p=document.createElement('p'); p.className='qhint'; p.textContent='وجّه شعاع النظارة إلى الجزء المطلوب واضغط الزناد، أو انقر عليه هنا على المجسّم.'; qb.appendChild(p); }
+      if(pk!=null){ const ok=pk===q.answer, f=document.createElement('p'); f.className='qfb '+(ok?'ok':'bad'); f.textContent= ok?'✓ إجابة صحيحة':'✗ إجابة خاطئة. الصحيح: '+rightLabel(sl); qb.appendChild(f); }
+      if(scoreInfo().a){ const rb=document.createElement('button'); rb.className='btn mini'; rb.style.alignSelf='flex-start'; rb.textContent='إعادة الاختبار'; rb.addEventListener('click',()=>{ S.ans={}; Link.send({t:'qreset'}); setSlide(S.i,true); }); qb.appendChild(rb); }
+    }
+    const sc=scoreInfo(), se=$('#bScore'); se.hidden=!(sc.t&&sc.a); se.textContent='النتيجة '+sc.c+' من '+sc.t;
     $('#bPrev').disabled=S.i===0; $('#bNext').disabled=S.i===L.slides.length-1;
     $('#bHint').hidden = sl.model==='none';
     $('#bExplode').hidden = sl.model!=='rifle'; $('#bExplode').textContent = rig.exp?'تركيب':'تفكيك';
@@ -913,13 +1144,21 @@ function startBoard(){
     const n=S.lesson.slides.length; i=Math.max(0,Math.min(n-1,i|0));
     const changed = i!==S.i || !rig.model;
     S.i=i; S.hl=-1; const prevType=rig.type;
-    rig.load(S.lesson.slides[i]); rig.pointer.visible=false; if(prevType!==rig.type) sizeIt();
+    rig.load(S.lesson.slides[i], hideFind(i)); rig.pointer.visible=false; if(prevType!==rig.type) sizeIt();
     renderSide(); redrawInk();
     if(!remote){ Link.send({t:'slide', i}); if(changed) Link.send({t:'rot', q:rig.target.toArray()}); }
   }
   B.setSlide=setSlide;
+  function tone(ok){ if(!bactx) return; const play=(f,d,at,type)=>{ const o=bactx.createOscillator(), gn=bactx.createGain(), t=bactx.currentTime+at; o.type=type||'sine'; o.frequency.value=f; gn.gain.setValueAtTime(.15,t); gn.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(gn).connect(bactx.destination); o.start(t); o.stop(t+d+.02); }; if(ok){ play(880,.15,0); play(1320,.25,.12); } else play(180,.35,0,'square'); }
+  function boardAnswer(i,pick,remote){
+    const sl=S.lesson.slides[i]; if(!sl||!sl.quiz||S.ans[i]!=null) return;
+    S.ans[i]=pick; if(!remote) Link.send({t:'ans',i,pick});
+    if(i===S.i){ tone(pick===sl.quiz.answer); if(sl.quiz.kind==='find'){ rig.reveal(); S.hl=sl.quiz.answer; rig.setHL(S.hl); } }
+    renderSide();
+  }
+  B.answer=boardAnswer;
   $('#bLesson').addEventListener('change',e=>{
-    curId=e.target.value; store.set('sharh.cur',curId); S.lesson=lessonById(curId); inkBy={}; rig.type=null; S.i=0;
+    curId=e.target.value; store.set('sharh.cur',curId); S.lesson=lessonById(curId); inkBy={}; rig.type=null; S.i=0; S.ans={};
     setSlide(0,true); Link.send({t:'lesson', lesson:S.lesson, i:0}); Link.send({t:'rot', q:rig.target.toArray()}); e.target.blur();
   });
   $('#bPrev').addEventListener('click',()=>setSlide(S.i-1));
@@ -942,6 +1181,7 @@ function startBoard(){
   function setNdc(e){ const r=cvs.getBoundingClientRect(); ndc.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1); ray.setFromCamera(ndc,camera); }
   cvs.addEventListener('pointerdown',e=>{
     if(placing){ setNdc(e); const h=ray.intersectObjects(rig.meshes)[0]; if(h){ const p=rig.root.worldToLocal(h.point.clone()); finishPlace([+p.x.toFixed(3), +(p.y+0.01).toFixed(3), +p.z.toFixed(3)]); } return; }
+    if(hideFind(S.i)){ setNdc(e); const h=ray.intersectObjects(rig.hits)[0]; if(h){ boardAnswer(S.i,h.object.userData.hotspot); return; } }
     drag={x:e.clientX,y:e.clientY}; cvs.setPointerCapture(e.pointerId);
   });
   cvs.addEventListener('pointermove',e=>{
@@ -991,9 +1231,9 @@ function startBoard(){
       c.innerHTML=
         '<div class="scard-top"><span class="n">'+(k+1)+'</span><span class="grow"></span>'+
         '<button class="btn mini" data-a="up">أعلى</button><button class="btn mini" data-a="down">أسفل</button><button class="btn mini" data-a="del">حذف</button></div>'+
-        '<div class="row2"><div class="field"><label for="st'+k+'">عنوان الخطوة</label><input id="st'+k+'"></div>'+
+        '<div class="row2"><div class="field"><label for="st'+k+'">العنوان أو السؤال</label><input id="st'+k+'"></div>'+
         '<div class="field"><label for="sm'+k+'">المجسّم</label><select id="sm'+k+'"></select></div></div>'+
-        '<div class="xopt"></div>'+
+        '<div class="xopt"></div><div class="qopt" style="display:flex;flex-direction:column;gap:10px"></div>'+
         '<div class="field"><label for="sp'+k+'">النقاط (كل نقطة في سطر)</label><textarea id="sp'+k+'"></textarea></div>'+
         '<div class="field"><label>نقاط الإشارة على المجسّم</label><div class="hsl" style="display:flex;flex-direction:column;gap:8px"></div>'+
         '<div><button class="btn mini" data-a="addhs">+ إضافة نقطة على المجسّم</button></div></div>';
@@ -1003,8 +1243,22 @@ function startBoard(){
       m.addEventListener('change',()=>{ sl.model=m.value; sl.hotspots=sl.hotspots.filter(h=>h.p); openEditor(true,k); });
       const xo=c.querySelector('.xopt');
       if(sl.model==='rifle'){ xo.innerHTML='<label style="display:flex;gap:8px;align-items:center;font-size:15px"><input type="checkbox" id="sx'+k+'"> عرض السلاح مفككًا في هذه الخطوة</label>'; const cb=xo.querySelector('input'); cb.checked=!!sl.explode; cb.addEventListener('change',()=>sl.explode=cb.checked); }
-      else if(sl.model==='aid'){ xo.className='field xopt'; xo.innerHTML='<label for="sa'+k+'">المشهد</label><select id="sa'+k+'"></select>'; const ps=xo.querySelector('select'); Object.keys(AID_NAMES).forEach(key=>{ const o=document.createElement('option'); o.value=key; o.textContent=AID_NAMES[key]; ps.appendChild(o); }); ps.value=AID_NAMES[sl.pose]?sl.pose:'assess'; sl.pose=ps.value; ps.addEventListener('change',()=>sl.pose=ps.value); }
-      else if(sl.model==='figure'){ xo.className='field xopt'; xo.innerHTML='<label for="so'+k+'">الوضعية</label><select id="so'+k+'"></select>'; const ps=xo.querySelector('select'); Object.keys(POSE_NAMES).forEach(key=>{ const o=document.createElement('option'); o.value=key; o.textContent=POSE_NAMES[key]; ps.appendChild(o); }); ps.value=sl.pose||'standing'; ps.addEventListener('change',()=>sl.pose=ps.value); }
+      else if(sceneNames(sl.model)){ const NM=sceneNames(sl.model); xo.className='field xopt'; xo.innerHTML='<label for="so'+k+'">المشهد</label><select id="so'+k+'"></select>'; const ps=xo.querySelector('select'); Object.keys(NM).forEach(key=>{ const o=document.createElement('option'); o.value=key; o.textContent=NM[key]; ps.appendChild(o); }); ps.value=NM[sl.pose]?sl.pose:Object.keys(NM)[0]; sl.pose=ps.value; ps.addEventListener('change',()=>sl.pose=ps.value); }
+      const qo=c.querySelector('.qopt'), qk=sl.quiz?sl.quiz.kind:'none';
+      qo.innerHTML='<div class="field"><label for="sk'+k+'">نوع الخطوة</label><select id="sk'+k+'"><option value="none">شرح</option><option value="choice">سؤال اختيار من متعدد</option><option value="find">سؤال: أشر إلى الجزء</option></select></div>';
+      const ks=qo.querySelector('select'); ks.value=qk;
+      ks.addEventListener('change',()=>{ sl.quiz = ks.value==='none'?null : ks.value==='choice'?{kind:'choice',options:['الخيار الأول','الخيار الثاني'],answer:0} : {kind:'find',answer:0}; openEditor(true,k); });
+      if(qk==='choice'){
+        const f1=document.createElement('div'); f1.className='field'; f1.innerHTML='<label for="qo'+k+'">الخيارات (كل خيار في سطر)</label><textarea id="qo'+k+'"></textarea>'; qo.appendChild(f1);
+        const ta=f1.querySelector('textarea'); ta.value=sl.quiz.options.join('\n'); ta.addEventListener('change',()=>{ sl.quiz.options=ta.value.split('\n').map(x=>x.trim()).filter(Boolean); openEditor(true,k); });
+        const f2=document.createElement('div'); f2.className='field'; f2.innerHTML='<label for="qa'+k+'">الإجابة الصحيحة</label><select id="qa'+k+'"></select>'; qo.appendChild(f2);
+        const as=f2.querySelector('select'); sl.quiz.options.forEach((o,j)=>{ const op=document.createElement('option'); op.value=j; op.textContent=o; as.appendChild(op); }); as.value=sl.quiz.answer; as.addEventListener('change',()=>sl.quiz.answer=+as.value);
+      } else if(qk==='find'){
+        const f2=document.createElement('div'); f2.className='field';
+        if(sl.hotspots.length){ f2.innerHTML='<label for="qa'+k+'">الجزء المطلوب</label><select id="qa'+k+'"></select>'; const as=f2.querySelector('select'); sl.hotspots.forEach((h,j)=>{ const op=document.createElement('option'); op.value=j; op.textContent=h.label; as.appendChild(op); }); as.value=Math.min(sl.quiz.answer,sl.hotspots.length-1); as.addEventListener('change',()=>sl.quiz.answer=+as.value); }
+        else f2.innerHTML='<span style="color:var(--mute);font-size:14px">أضف نقاط إشارة على المجسّم أولًا، ثم اختر الجزء المطلوب منها.</span>';
+        qo.appendChild(f2);
+      }
       const p=c.querySelector('#sp'+k); p.value=sl.points.join('\n'); p.addEventListener('input',()=>sl.points=p.value.split('\n'));
       const hl=c.querySelector('.hsl');
       sl.hotspots.forEach((h,j)=>{
@@ -1034,7 +1288,7 @@ function startBoard(){
     commitDraftPoints();
     const L=normalizeLesson(draft); S.lesson=L;
     const cs=customs(); cs[draftId]=L; store.set('sharh.custom',cs); curId=draftId; store.set('sharh.cur',curId); fillLessonSelect($('#bLesson'),curId);
-    $('#editor').hidden=true; draft=null; rig.type=null; inkBy={};
+    $('#editor').hidden=true; draft=null; rig.type=null; inkBy={}; S.ans={};
     setSlide(Math.min(S.i,L.slides.length-1),true);
     Link.send({t:'lesson', lesson:L, i:S.i});
   });
@@ -1072,6 +1326,8 @@ function startBoard(){
     else if(m.t==='slide'){ setSlide(m.i,true); }
     else if(m.t==='rot' && Array.isArray(m.q) && !drag){ rig.target.fromArray(m.q); }
     else if(m.t==='exp'){ rig.exp=m.v?1:0; $('#bExplode').textContent=rig.exp?'تركيب':'تفكيك'; }
+    else if(m.t==='ans' && typeof m.i==='number'){ boardAnswer(m.i,m.pick,true); }
+    else if(m.t==='qreset'){ S.ans={}; setSlide(S.i,true); }
     else if(m.t==='ptr'){
       if(Array.isArray(m.p)){ rig.pointer.position.fromArray(m.p); rig.pointer.visible=true; } else rig.pointer.visible=false;
       const h=typeof m.h==='number'?m.h:-1; if(h!==S.hl){ S.hl=h; rig.setHL(h); renderSide(); }
@@ -1132,7 +1388,7 @@ function startHeadset(){
   const pcv=document.createElement('canvas'); pcv.width=Math.round(PW*PPM); pcv.height=Math.round(PH*PPM);
   const pctx=pcv.getContext('2d'); const ptex=new THREE.CanvasTexture(pcv); ptex.anisotropy=4;
   const panel=new THREE.Mesh(new THREE.PlaneGeometry(PW,PH), new THREE.MeshBasicMaterial({map:ptex, transparent:true}));
-  panel.position.set(0,1.72,-1.55); panel.renderOrder=10; scene.add(panel);
+  panel.position.set(0,1.86,-1.55); panel.renderOrder=10; scene.add(panel);
   let buttons=[], hoverBtn=null;
   function wrap(ctx,text,maxW){ const words=String(text).split(/\s+/); const lines=[]; let cur=''; for(const w of words){ const t=cur?cur+' '+w:w; if(ctx.measureText(t).width>maxW && cur){ lines.push(cur); cur=w; } else cur=t; } if(cur) lines.push(cur); return lines; }
   function txt(s,x,y,size,color,weight,align){ pctx.font=(weight||700)+' '+size+'px '+FONT; pctx.fillStyle=color; pctx.textAlign=align||'right'; pctx.textBaseline='middle'; pctx.direction='rtl'; pctx.fillText(s,x,y); }
@@ -1142,15 +1398,27 @@ function startHeadset(){
     rr(x,4,4,W-8,Hh-8,34); x.fillStyle='rgba(10,22,48,0.94)'; x.fill(); x.lineWidth=4; x.strokeStyle=PAL.gold; x.stroke();
     txt(L.title, W-44, 52, 26, PAL.mute, 500);
     txt((S.i+1)+' / '+L.slides.length, 44, 52, 30, PAL.gold2, 800, 'left');
+    const sci=scoreInfo(); if(sci.t && sci.a){ x.font='800 30px '+FONT; const cw=x.measureText((S.i+1)+' / '+L.slides.length).width; txt('النتيجة '+sci.c+' من '+sci.t, 44+cw+24, 52, 24, PAL.ok, 700, 'left'); }
     if(rig.status){ x.font='800 30px '+FONT; const sw=x.measureText(rig.status).width+36; rr(x,40,84,sw,52,14); x.fillStyle=PAL.gold2; x.fill(); txt(rig.status, 40+sw/2, 111, 30, PAL.navy, 800, 'center'); }
     x.fillStyle=PAL.gold; x.fillRect(W-44-90, 82, 90, 4);
-    txt(sl.title, W-44, 134, 50, PAL.ink, 800);
-    x.font='500 30px '+FONT; let y=200; const maxW=W-130;
-    for(const p of sl.points){
-      const lines=wrap(x,p,maxW);
-      x.fillStyle=PAL.gold2; x.fillRect(W-58, y-7, 13, 13);
-      for(const ln of lines){ if(y>Hh-170) break; txt(ln, W-76, y, 30, PAL.ink, 500); y+=42; }
-      y+=10; if(y>Hh-170) break;
+    const q=quizOf(sl), optBtns=[];
+    if(!q){
+      txt(sl.title, W-44, 134, 50, PAL.ink, 800);
+      x.font='500 30px '+FONT; let y=200; const maxW=W-130;
+      for(const p of sl.points){
+        const lines=wrap(x,p,maxW);
+        x.fillStyle=PAL.gold2; x.fillRect(W-58, y-7, 13, 13);
+        for(const ln of lines){ if(y>Hh-170) break; txt(ln, W-76, y, 30, PAL.ink, 500); y+=42; }
+        y+=10; if(y>Hh-170) break;
+      }
+    } else {
+      x.font='800 40px '+FONT; let ty=132; wrap(x,sl.title,W-300).slice(0,2).forEach(l=>{ txt(l,W-44,ty,40,PAL.ink,800); ty+=50; });
+      const pk=S.ans[S.i];
+      if(q.kind==='choice'){
+        const gx=16, bw2=(W-88-gx)/2, bh2=64, top=ty-6;
+        q.options.forEach((o,k)=>{ const col=k%2, row=Math.floor(k/2); optBtns.push({id:'opt'+k, label:o, x:W-44-bw2-col*(bw2+gx), y:top+row*(bh2+12), w:bw2, h:bh2, on:pk==null, opt:true, st: pk==null?null:(k===q.answer?'ok':(k===pk?'bad':null))}); });
+      } else if(pk==null){ txt('وجّه الشعاع إلى الجزء المطلوب على المجسّم واضغط الزناد', W-44, ty+14, 28, PAL.gold2, 700); }
+      if(pk!=null){ const ok=pk===q.answer; txt(ok?'✓ إجابة صحيحة':'✗ الصحيح: '+rightLabel(sl), W-44, Hh-188, 30, ok?PAL.ok:PAL.bad, 800); }
     }
     const alive=Link.alive();
     x.fillStyle=alive?PAL.ok:PAL.mute; x.beginPath(); x.arc(W-52, Hh-140, 8, 0, Math.PI*2); x.fill();
@@ -1162,7 +1430,16 @@ function startHeadset(){
     defs.push({id:'reset',label:'إعادة',on:true,w:0.75},{id:'exit',label:'خروج',on:true,w:0.75});
     const unit=(W-m*2-g*(defs.length-1))/defs.reduce((a,b)=>a+b.w,0); let bx=W-m;
     buttons=defs.map(d=>{ const w=d.w*unit; bx-=w; const b=Object.assign({},d,{x:bx,y:by,w,h:bh}); bx-=g; return b; });
-    buttons.forEach(b=>{
+    optBtns.forEach(b=>{
+      const hov=hoverBtn===b.id && b.on;
+      rr(x,b.x,b.y,b.w,b.h,16);
+      x.fillStyle = b.st==='ok'?'#1d5a42' : b.st==='bad'?'#6b2a26' : hov?PAL.navy3:PAL.navy2; x.fill();
+      x.lineWidth=3; x.strokeStyle = b.st==='ok'?PAL.ok : b.st==='bad'?PAL.bad : hov?PAL.gold2:PAL.line; x.stroke();
+      let fs=28; x.font='700 '+fs+'px '+FONT; while(x.measureText(b.label).width>b.w-28 && fs>16){ fs-=2; x.font='700 '+fs+'px '+FONT; }
+      txt(b.label, b.x+b.w/2, b.y+b.h/2+2, fs, PAL.ink, 700, 'center');
+    });
+    buttons=buttons.concat(optBtns);
+    buttons.forEach(b=>{ if(b.opt) return;
       const hov=hoverBtn===b.id && b.on;
       rr(x,b.x,b.y,b.w,b.h,20);
       x.fillStyle = b.primary ? (hov?PAL.gold2:PAL.gold) : (hov?PAL.navy3:PAL.navy2); x.globalAlpha=b.on?1:.35; x.fill();
@@ -1182,11 +1459,18 @@ function startHeadset(){
   function setSlide(i, remote){
     const n=S.lesson.slides.length; i=Math.max(0,Math.min(n-1,i|0));
     const changed=i!==S.i||!rig.model;
-    S.i=i; S.hl=-1; rig.load(S.lesson.slides[i]); rig.root.quaternion.copy(rig.target); stage.scale.setScalar(baseScale());
+    S.i=i; S.hl=-1; rig.load(S.lesson.slides[i], hideFind(i)); rig.root.quaternion.copy(rig.target); stage.scale.setScalar(baseScale());
     drawPanel();
     if(!remote){ Link.send({t:'slide',i}); if(changed) Link.send({t:'rot',q:rig.root.quaternion.toArray()}); }
   }
+  function hsAnswer(i,pick,remote,src){
+    const sl=S.lesson.slides[i]; if(!sl||!sl.quiz||S.ans[i]!=null) return;
+    S.ans[i]=pick; if(!remote) Link.send({t:'ans',i,pick});
+    if(i===S.i){ const ok=pick===sl.quiz.answer; if(ok){ beep(880,.14); setTimeout(()=>beep(1320,.22),120); pulse(src,.6,80); } else { beep(190,.35); pulse(src,1,220); } if(sl.quiz.kind==='find'){ rig.reveal(); S.hl=sl.quiz.answer; rig.setHL(S.hl); } }
+    drawPanel();
+  }
   function action(id){
+    if(id.indexOf('opt')===0){ hsAnswer(S.i, +id.slice(3)); return; }
     beep(880,.05);
     if(id==='prev') setSlide(S.i-1); else if(id==='next') setSlide(S.i+1); else if(id==='exit') exitAll();
     else if(id==='exp'){ rig.exp=rig.exp?0:1; Link.send({t:'exp',v:rig.exp}); drawPanel(); }
@@ -1229,6 +1513,7 @@ function startHeadset(){
     const hit=hitTest();
     if(!hit) return;
     if(hit.object===panel){ const id=panelButtonAt(ray); if(id){ pulse(src,.3,30); action(id); } return; }
+    if(hit.object.userData.hotspot!=null && hideFind(S.i)){ hsAnswer(S.i, hit.object.userData.hotspot, false, src); return; }
     // start rotate drag
     if(ctrlObj){ ctrlObj.getWorldQuaternion(tmpQ); drag={ctrl:ctrlObj, q0:tmpQ.clone(), m0:rig.root.quaternion.clone()}; pulse(src,.4,40); }
   }
@@ -1284,6 +1569,7 @@ function startHeadset(){
   cvs.addEventListener('pointerdown',e=>{
     if(mode!=='desk') return; ensureAudio(); mray(e); const h=hitTest(); if(!h) return;
     if(h.object===panel){ const id=panelButtonAt(ray); if(id) action(id); return; }
+    if(h.object.userData.hotspot!=null && hideFind(S.i)){ hsAnswer(S.i, h.object.userData.hotspot); return; }
     mdrag={x:e.clientX,y:e.clientY}; cvs.setPointerCapture(e.pointerId);
   });
   cvs.addEventListener('pointermove',e=>{
@@ -1304,7 +1590,9 @@ function startHeadset(){
 
   // ---- link
   Link.onMsg=(m)=>{
-    if(m.t==='lesson' && validLesson(m.lesson)){ S.lesson=normalizeLesson(m.lesson); rig.type=null; setSlide(typeof m.i==='number'?m.i:S.i,true); }
+    if(m.t==='lesson' && validLesson(m.lesson)){ S.lesson=normalizeLesson(m.lesson); S.ans={}; rig.type=null; setSlide(typeof m.i==='number'?m.i:S.i,true); }
+    else if(m.t==='ans' && typeof m.i==='number'){ hsAnswer(m.i,m.pick,true); }
+    else if(m.t==='qreset'){ S.ans={}; setSlide(S.i,true); }
     else if(m.t==='slide'){ setSlide(m.i,true); }
     else if(m.t==='rot' && Array.isArray(m.q) && !drag && !mdrag){ rig.target.fromArray(m.q); rig.root.quaternion.copy(rig.target); }
     else if(m.t==='exp'){ rig.exp=m.v?1:0; drawPanel(); }
@@ -1323,7 +1611,7 @@ function startHeadset(){
   // ---- modes
   let mode='idle';
   function layout(){
-    if(mode==='desk'){ camera.position.set(0,1.55,0.55); camera.lookAt(0,1.28,-1.0); camera.fov=60; }
+    if(mode==='desk'){ camera.position.set(0,1.55,0.6); camera.lookAt(0,1.36,-1.0); camera.fov=62; }
     camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
   }
   async function enterXR(kind){
@@ -1359,9 +1647,9 @@ function startHeadset(){
 
   // ---- init
   const hsel=$('#hLesson'); fillLessonSelect(hsel,curId);
-  hsel.addEventListener('change',()=>{ curId=hsel.value; store.set('sharh.cur',curId); S.lesson=lessonById(curId); rig.type=null; S.i=0; setSlide(0,true); });
+  hsel.addEventListener('change',()=>{ curId=hsel.value; store.set('sharh.cur',curId); S.lesson=lessonById(curId); S.ans={}; rig.type=null; S.i=0; setSlide(0,true); });
   setSlide(0,true); drawPanel();
-  HS={setSlide, rig, drawPanel};
+  HS={setSlide, rig, drawPanel, answer:hsAnswer};
 
   (async function(){
     const framed=(function(){ try{ return window.self!==window.top; }catch(e){ return true; } })();
