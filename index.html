@@ -77,6 +77,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
 .hint{position:absolute;bottom:12px;left:12px;font-size:13px;color:var(--mute);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;pointer-events:none}
 #ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;touch-action:none;z-index:3}
 #ink.active{pointer-events:auto;cursor:crosshair}
+#bStat{position:absolute;top:14px;left:14px;z-index:2;background:var(--gold2);color:var(--on-gold);font-weight:800;font-size:clamp(20px,2.2vw,34px);border-radius:12px;padding:8px 16px;font-variant-numeric:tabular-nums}
 #placeBanner{position:absolute;top:12px;right:12px;left:12px;z-index:4;background:var(--gold2);color:var(--on-gold);font-weight:700;border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 #board footer{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface)}
 .grow{flex:1}
@@ -168,6 +169,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
     </aside>
     <div class="stagebox">
       <div id="boardStage"></div>
+      <div class="chip" id="bStat" hidden></div>
       <div class="hint" id="bHint">اسحب لتدوير المجسّم · العجلة للتكبير</div>
     </div>
     <canvas id="ink"></canvas>
@@ -339,10 +341,37 @@ const MARKS = {
      hotspots:[{label:'إصبع الزناد',a:'trigger'},{label:'ملامسة الخد',a:'cheek'}]}
   ]
 };
-const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}, {id:'marks', lesson:MARKS}];
-const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', rifle:'سلاح تدريبي (قابل للتفكيك)', figure:'وضعية الرامي', sight:'صورة التصويب', none:'بدون مجسّم'};
+const AIDL = {
+  title:'الإسعافات الأولية الميدانية',
+  slides:[
+    {title:'تقييم المكان والمصاب', model:'aid', pose:'assess',
+     points:['تأكد أن المكان آمن لك وللمصاب قبل الاقتراب','كلّم المصاب واضغط على كتفيه: هل يستجيب؟','افحص التنفس بالنظر إلى حركة الصدر مدة لا تزيد على 10 ثوانٍ','اطلب المساعدة فورًا، وكلّف شخصًا محددًا بالاتصال بالإسعاف'],
+     hotspots:[{label:'راقب حركة الصدر',a:'chest'},{label:'اضغط على الكتفين',a:'shoulderC'}]},
+    {title:'إيقاف النزيف بالضغط المباشر', model:'aid', pose:'pressure',
+     points:['اكشف الجرح وحدّد مصدر النزيف','اضغط مباشرة على الجرح بضماد أو قطعة قماش نظيفة','استمر بالضغط القوي ولا ترفع يديك للتحقق','إذا تشبّع الضماد فضع فوقه ضمادًا آخر ولا تنزعه'],
+     hotspots:[{label:'موضع الجرح',a:'wound'},{label:'ضغط بكلتا اليدين',a:'shoulders'}]},
+    {title:'الرباط الضاغط (التورنيكيه)', model:'aid', pose:'tourniquet',
+     points:['للنزيف الشديد في الذراع أو الساق إذا لم يتوقف بالضغط','ضعه من 5 إلى 7 سم فوق الجرح، وليس على المفصل','شدّه حتى يتوقف النزيف تمامًا، ثم ثبّت القضيب','اكتب وقت الربط على الرباط أو جبهة المصاب، ولا تفكّه'],
+     hotspots:[{label:'الرباط الضاغط',a:'tq'},{label:'الجرح',a:'wound'},{label:'اكتب وقت الربط',a:'forehead'}]},
+    {title:'وضعية الإفاقة', model:'aid', pose:'recovery',
+     points:['للمصاب الذي يتنفس لكنه فاقد الوعي','الذراع القريبة بزاوية قائمة، واليد البعيدة تحت الخد','اثنِ الركبة البعيدة واقلب المصاب نحوك على جنبه','أمِل الرأس للخلف قليلًا ليبقى مجرى الهواء مفتوحًا، وراقب تنفسه'],
+     hotspots:[{label:'مجرى الهواء مفتوح',a:'head'},{label:'الركبة المثنية',a:'knee'},{label:'اليد تحت الخد',a:'cheek'}]},
+    {title:'الإنعاش القلبي الرئوي (CPR)', model:'aid', pose:'cpr',
+     points:['إذا لم يستجب المصاب ولا يتنفس طبيعيًا فابدأ فورًا','ضع كعب يدك في منتصف الصدر واشبك الأخرى فوقها','الذراعان مستقيمتان، والكتفان فوق اليدين مباشرة','اضغط بعمق 5 إلى 6 سم، بمعدل 100 إلى 120 ضغطة في الدقيقة، واترك الصدر يرتد كاملًا'],
+     hotspots:[{label:'منتصف الصدر',a:'hands'},{label:'الكتفان فوق اليدين',a:'shoulders'}]},
+    {title:'30 ضغطة ثم نفَسان', model:'aid', pose:'cpr30',
+     points:['30 ضغطة صدرية ثم نفَسان إنقاذيان، وكرّر','قبل النفَس: أمِل الرأس للخلف وارفع الذقن','مدة كل نفَس ثانية واحدة حتى يرتفع الصدر','إذا لم تكن مدرّبًا على التنفس فاستمر بالضغطات وحدها دون توقف'],
+     hotspots:[{label:'إمالة الرأس ورفع الذقن',a:'head'},{label:'الضغطات',a:'hands'}]},
+    {title:'طلب الإسعاف والإخلاء', model:'aid', pose:'evac',
+     points:['اتصل بالهلال الأحمر على 997، أو بالرقم الموحد 911','حدّد الموقع بدقة، وعدد المصابين وحالتهم','لا تحرّك المصاب إلا إذا كان في خطر مباشر','ابقَ مع المصاب وراقب تنفسه حتى وصول الفرقة'],
+     hotspots:[{label:'الاتصال بالإسعاف',a:'phone'},{label:'راقب التنفس',a:'head'}]}
+  ]
+};
+const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}, {id:'marks', lesson:MARKS}, {id:'aid', lesson:AIDL}];
+const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', rifle:'سلاح تدريبي (قابل للتفكيك)', figure:'وضعية الرامي', sight:'صورة التصويب', aid:'مُسعف ومصاب', none:'بدون مجسّم'};
+const AID_NAMES = {assess:'تقييم المصاب', pressure:'ضغط مباشر على الجرح', tourniquet:'الرباط الضاغط', recovery:'وضعية الإفاقة', cpr:'الإنعاش القلبي (مستمر)', cpr30:'الإنعاش 30:2 مع العدّاد', evac:'طلب الإسعاف'};
 const POSE_NAMES = {standing:'الوقوف', kneeling:'الجثو', prone:'الانبطاح'};
-const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}, rifle:{y:0.04,h:0.45,d:1.2,xr:0.75}, figure:{y:0.26,h:0.32,d:1.6,xr:0.7}, sight:{y:0.28,h:0.12,d:1.22,xr:0.8}};
+const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}, rifle:{y:0.04,h:0.45,d:1.2,xr:0.75}, figure:{y:0.26,h:0.32,d:1.6,xr:0.7}, sight:{y:0.28,h:0.12,d:1.22,xr:0.8}, aid:{y:0.14,h:0.5,d:1.35,xr:0.75}};
 
 function validLesson(L){
   return L && typeof L==='object' && Array.isArray(L.slides) && L.slides.length>0 &&
@@ -352,7 +381,7 @@ function normalizeLesson(L){
   const out = {title: String(L.title||'درس بدون عنوان'), slides:[]};
   L.slides.forEach(s=>{
     out.slides.push({
-      title:String(s.title||''), model: MODEL_NAMES[s.model]?s.model:'none', explode:!!s.explode, pose: POSE_NAMES[s.pose]?s.pose:'standing',
+      title:String(s.title||''), model: MODEL_NAMES[s.model]?s.model:'none', explode:!!s.explode, pose: (POSE_NAMES[s.pose]||AID_NAMES[s.pose])?s.pose:'standing',
       points:(s.points||[]).map(String).filter(x=>x.trim()),
       hotspots:(Array.isArray(s.hotspots)?s.hotspots:[]).filter(h=>h&&(h.a||Array.isArray(h.p))).map(h=>h.a?{label:String(h.label||''),a:String(h.a)}:{label:String(h.label||''),p:h.p.slice(0,3).map(Number)})
     });
@@ -377,6 +406,9 @@ const ANCHORS = {
     trigger:rp(0.075,-0.012,0.01,'lower'), safety:rp(0.13,0.03,0.03,'lower'), stock:rp(0.46,0.095,0.02,'stock'), mag:rp(0.02,-0.19,0.0,'mag'),
     front:rp(-0.44,0.165,0,'upper'), rear:rp(0.17,0.14,0,'upper')},
   figure:function(slide,k){ const J=poseLocal(slide.pose); const m={shoulder:'butt',cheek:'head',elbowL:'eL',kneeL:'kneeL',trigger:'hR',support:'hL',footL:'footL',footR:'footR'}; const v=J[m[k]]||J.chest; return [v.x,v.y+0.01,v.z]; },
+  aid:function(slide,k){ const sc=AID[slide.pose]||AID.assess, C=CAS[sc.c], R=RES[sc.r]; const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2,-(a[2]+b[2])/2];
+    const m={wound:[0.2,0.15,0.11], tq:[0.05,0.17,0.1], hands:mid(R.hL,R.hR), shoulders:mid(R.sL,R.sR), chest:C.chest, head:C.head, phone:[R.chest[0],R.chest[1]-0.15,-R.chest[2]], shoulderC:[C.sR[0],C.sR[1]+0.04,C.sR[2]], cheek:C.hR, knee:C.kneeR, forehead:[C.head[0],C.head[1]+0.08,C.head[2]]};
+    const v=aidP(m[k]||C.chest); return [v.x, v.y+0.03, v.z]; },
   sight:{ok:[0.32,0.36,0.012], high:[0,0.36,0.012], side:[-0.32,0.36,0.012]},
   none:{}
 };
@@ -560,23 +592,90 @@ function poseLocal(name){
   return o;
 }
 const BONES=[['chest','pelvis',0.05],['sL','sR',0.026],['sR','eR',0.02],['eR','hR',0.018],['sL','eL',0.02],['eL','hL',0.018],['hipL','hipR',0.032],['hipL','kneeL',0.026],['kneeL','footL',0.021],['hipR','kneeR',0.026],['kneeR','footR',0.021],['chest','head',0.018]];
+/* Skeleton: capsule bones between joints, eased toward a target pose, optional per-joint vertical bias (for CPR motion) */
+function makeSkeleton(g, cloth, headMat, gunMat){
+  const Y=new THREE.Vector3(0,1,0), X=new THREE.Vector3(1,0,0), d=new THREE.Vector3();
+  const bones=BONES.map(([a,b,r])=>{ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,1,12),cloth); g.add(m); return {a,b,m}; });
+  const joints=['head','hR','hL','kneeL','kneeR','eL','eR','footL','footR'].map(k=>{ const r=k==='head'?0.045:k.indexOf('foot')===0?0.024:0.021; const m=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),k==='head'?headMat:cloth); g.add(m); return {k,m}; });
+  let rifle=null; if(gunMat){ rifle=new THREE.Mesh(new THREE.BoxGeometry(1,0.026,0.02),gunMat); g.add(rifle); }
+  let cur=null, tgt=null; const pos={}, bias={};
+  function apply(){
+    for(const k in cur){ pos[k].copy(cur[k]); if(bias[k]) pos[k].y+=bias[k]; }
+    bones.forEach(({a,b,m})=>{ d.copy(pos[b]).sub(pos[a]); const L=d.length()||1e-4; m.position.copy(pos[a]).add(pos[b]).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(Y,d.normalize()); m.scale.set(1,L,1); });
+    joints.forEach(({k,m})=>m.position.copy(pos[k]));
+    if(rifle && pos.butt && pos.muzzle){ d.copy(pos.muzzle).sub(pos.butt); const L=d.length(); rifle.position.copy(pos.butt).add(pos.muzzle).multiplyScalar(0.5); rifle.quaternion.setFromUnitVectors(X,d.normalize()); rifle.scale.set(L,1,1); }
+  }
+  return {
+    setTarget(t,snap){ tgt=t; if(snap||!cur){ cur={}; for(const k in t){ cur[k]=t[k].clone(); pos[k]=new THREE.Vector3(); } } apply(); },
+    setBias(keys,v){ keys.forEach(k=>bias[k]=v); },
+    tick(){ if(!tgt) return; for(const k in tgt) cur[k].lerp(tgt[k],0.07); apply(); }
+  };
+}
 function buildFigure(){
-  const g=new THREE.Group(), Y=new THREE.Vector3(0,1,0), X=new THREE.Vector3(1,0,0);
+  const g=new THREE.Group();
   const cloth=new THREE.MeshStandardMaterial({color:0x9c8a62, roughness:.85});
   const helmet=new THREE.MeshStandardMaterial({color:0x6f6a4c, roughness:.7});
   const gun=new THREE.MeshStandardMaterial({color:0x1b1e24, roughness:.6, metalness:.3});
   const ground=new THREE.Mesh(new THREE.BoxGeometry(1.05,0.01,0.5), new THREE.MeshStandardMaterial({color:0x8d7c58, roughness:1})); ground.position.y=-0.056; g.add(ground);
-  const bones=BONES.map(([a,b,r])=>{ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,1,12),cloth); g.add(m); return {a,b,m}; });
-  const joints=['head','hR','hL','kneeL','kneeR','eL','eR','footL','footR'].map(k=>{ const r=k==='head'?0.045:k.indexOf('foot')===0?0.024:0.021; const m=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),k==='head'?helmet:cloth); g.add(m); return {k,m}; });
-  const rifle=new THREE.Mesh(new THREE.BoxGeometry(1,0.026,0.02),gun); g.add(rifle);
-  let cur=null, tgt=null; const d=new THREE.Vector3();
-  function apply(){
-    bones.forEach(({a,b,m})=>{ d.copy(cur[b]).sub(cur[a]); const L=d.length()||1e-4; m.position.copy(cur[a]).add(cur[b]).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(Y,d.normalize()); m.scale.set(1,L,1); });
-    joints.forEach(({k,m})=>m.position.copy(cur[k]));
-    d.copy(cur.muzzle).sub(cur.butt); const L=d.length(); rifle.position.copy(cur.butt).add(cur.muzzle).multiplyScalar(0.5); rifle.quaternion.setFromUnitVectors(X,d.normalize()); rifle.scale.set(L,1,1);
-  }
-  g.userData.setPose=(name,snap)=>{ tgt=poseLocal(name); if(snap||!cur){ cur={}; for(const k in tgt) cur[k]=tgt[k].clone(); } apply(); };
-  g.userData.tick=()=>{ if(!tgt) return; let mv=false; for(const k in tgt){ if(cur[k].distanceToSquared(tgt[k])>1e-9){ cur[k].lerp(tgt[k],0.07); mv=true; } } if(mv) apply(); };
+  const sk=makeSkeleton(g,cloth,helmet,gun);
+  g.userData.setPose=(name,snap)=>sk.setTarget(poseLocal(name),snap);
+  g.userData.tick=()=>sk.tick();
+  return g;
+}
+/* First-aid scenes: casualty + rescuer (raw metres, scaled by AS) */
+const CAS={
+  supine:{head:[-0.82,0.1,0],chest:[-0.55,0.1,0],pelvis:[-0.05,0.1,0],sL:[-0.6,0.1,-0.19],sR:[-0.6,0.1,0.19],eL:[-0.33,0.06,-0.28],hL:[-0.08,0.05,-0.28],eR:[-0.33,0.06,0.28],hR:[-0.08,0.05,0.28],hipL:[-0.02,0.1,-0.1],hipR:[-0.02,0.1,0.1],kneeL:[0.42,0.08,-0.12],kneeR:[0.42,0.08,0.12],footL:[0.85,0.1,-0.14],footR:[0.85,0.1,0.14]},
+  recovery:{head:[-0.84,0.12,0.04],chest:[-0.55,0.2,0],pelvis:[-0.05,0.18,0],sL:[-0.6,0.06,-0.02],sR:[-0.6,0.34,0.0],eL:[-0.6,0.05,0.3],hL:[-0.6,0.05,0.58],eR:[-0.62,0.22,0.3],hR:[-0.84,0.07,0.15],hipL:[-0.02,0.08,0],hipR:[-0.02,0.28,0],kneeL:[0.42,0.06,-0.02],kneeR:[0.3,0.12,0.4],footL:[0.85,0.06,-0.04],footR:[0.62,0.06,0.18]}
+};
+const RES_BASE={head:[-0.45,1.12,0.32],chest:[-0.45,0.95,0.38],pelvis:[-0.45,0.5,0.47],sL:[-0.63,0.92,0.4],sR:[-0.27,0.92,0.4],eL:[-0.66,0.55,0.32],hL:[-0.62,0.17,0.12],eR:[-0.32,0.55,0.32],hR:[-0.55,0.17,0.2],hipL:[-0.55,0.48,0.47],hipR:[-0.35,0.48,0.47],kneeL:[-0.55,0.04,0.45],kneeR:[-0.35,0.04,0.45],footL:[-0.55,0.06,0.85],footR:[-0.35,0.06,0.85]};
+function resVariant(dx, over){ const o={}; for(const k in RES_BASE) o[k]=[RES_BASE[k][0]+dx,RES_BASE[k][1],RES_BASE[k][2]]; return Object.assign(o,over||{}); }
+const RES={
+  assess:resVariant(0),
+  pressure:resVariant(0.6,{chest:[0.18,0.85,0.34],head:[0.16,1.0,0.27],hR:[0.17,0.16,0.13],hL:[0.24,0.16,0.1],eR:[0.22,0.5,0.3],eL:[0.3,0.5,0.28]}),
+  tourniquet:resVariant(0.5,{chest:[0.06,0.85,0.34],head:[0.04,1.0,0.27],hR:[0.03,0.18,0.14],hL:[0.08,0.18,0.06],eR:[0.1,0.5,0.3],eL:[0.16,0.5,0.26]}),
+  recovery:resVariant(0,{hR:[-0.1,0.32,0.1],eR:[-0.2,0.6,0.3],hL:[-0.6,0.38,0.08],eL:[-0.62,0.62,0.3]}),
+  cpr:{head:[-0.5,0.94,0.07],chest:[-0.5,0.78,0.12],pelvis:[-0.5,0.48,0.38],sL:[-0.6,0.74,0.08],sR:[-0.4,0.74,0.08],eL:[-0.56,0.45,0.04],eR:[-0.44,0.45,0.04],hL:[-0.52,0.16,0.0],hR:[-0.48,0.16,0.0],hipL:[-0.6,0.48,0.38],hipR:[-0.4,0.48,0.38],kneeL:[-0.6,0.04,0.32],kneeR:[-0.4,0.04,0.32],footL:[-0.6,0.06,0.7],footR:[-0.4,0.06,0.7]},
+  evac:{head:[0.55,1.62,0.75],chest:[0.55,1.45,0.75],pelvis:[0.55,0.98,0.75],sL:[0.55,1.42,0.57],sR:[0.55,1.42,0.93],eL:[0.57,1.15,0.52],hL:[0.6,0.9,0.55],eR:[0.6,1.25,1.03],hR:[0.55,1.6,0.87],hipL:[0.55,0.95,0.65],hipR:[0.55,0.95,0.85],kneeL:[0.55,0.52,0.65],kneeR:[0.55,0.52,0.85],footL:[0.58,0.04,0.65],footR:[0.58,0.04,0.85]}
+};
+const AID={assess:{c:'supine',r:'assess'}, pressure:{c:'supine',r:'pressure',wound:1}, tourniquet:{c:'supine',r:'tourniquet',wound:1,tq:1}, recovery:{c:'recovery',r:'recovery'}, cpr:{c:'supine',r:'cpr',pump:'cont'}, cpr30:{c:'supine',r:'cpr',pump:'30'}, evac:{c:'recovery',r:'evac'}};
+const AS=0.4;
+function aidP(a,mirror){ return new THREE.Vector3(a[0]*AS, a[1]*AS-0.05, ((mirror?-a[2]:a[2])+0.15)*AS); }
+function aidPose(set,mirror){ const o={}; for(const k in set) o[k]=aidP(set[k],mirror); return o; }
+function buildAid(){
+  const g=new THREE.Group();
+  const ground=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.01,0.62), new THREE.MeshStandardMaterial({color:0x8d7c58, roughness:1})); ground.position.y=-0.056; g.add(ground);
+  const cas=makeSkeleton(g, new THREE.MeshStandardMaterial({color:0x6f7d52, roughness:.85}), new THREE.MeshStandardMaterial({color:0xc69c7a, roughness:.8}), null);
+  const res=makeSkeleton(g, new THREE.MeshStandardMaterial({color:0x2f5d8a, roughness:.8}), new THREE.MeshStandardMaterial({color:0xeef2f8, roughness:.6}), null);
+  const wound=new THREE.Mesh(new THREE.SphereGeometry(0.02,16,10), new THREE.MeshStandardMaterial({color:0xb3261e, roughness:.4})); wound.scale.set(1.6,0.45,1);
+  const wp=aidP([0.2,0.09,0.11]); wound.position.set(wp.x,wp.y+0.024,wp.z); g.add(wound);
+  const tq=new THREE.Group();
+  const band=new THREE.Mesh(new THREE.TorusGeometry(0.03,0.008,10,32), new THREE.MeshStandardMaterial({color:0x1b1e24, roughness:.7})); band.rotation.y=Math.PI/2; tq.add(band);
+  const rod=new THREE.Mesh(new THREE.BoxGeometry(0.008,0.008,0.06), new THREE.MeshStandardMaterial({color:0xd8503f})); rod.position.y=0.036; tq.add(rod);
+  const tp=aidP([0.05,0.1,0.1]); tq.position.set(tp.x,tp.y,tp.z); g.add(tq);
+  let pump=null, phase0=0, last=-1;
+  g.userData.status='';
+  g.userData.setPose=(name,snap)=>{
+    const sc=AID[name]||AID.assess;
+    cas.setTarget(aidPose(CAS[sc.c]),snap); res.setTarget(aidPose(RES[sc.r],true),snap);
+    wound.visible=!!sc.wound; tq.visible=!!sc.tq; pump=sc.pump||null; phase0=performance.now(); last=-1;
+    g.userData.status = pump==='30' ? 'ضغطة 0 من 30' : pump==='cont' ? '110 ضغطات في الدقيقة' : '';
+  };
+  const UP=['chest','head','sL','sR','eL','eR','hL','hR'];
+  g.userData.tick=(t)=>{
+    let dy=0;
+    if(pump){
+      const period=60000/110, e=Math.max(0,t-phase0)-700;
+      if(e>0){
+        if(pump==='30'){
+          const cyc=30*period+4000, inC=e%cyc, n=Math.floor(e/cyc);
+          if(inC<30*period){ const k=Math.floor(inC/period), id=n*31+k; if(id!==last){ last=id; g.userData.status='ضغطة '+(k+1)+' من 30'; if(g.userData.beat) g.userData.beat(); } dy=Math.sin((inC%period)/period*Math.PI); }
+          else g.userData.status='نفَسان إنقاذيان';
+        } else { const k=Math.floor(e/period); if(k!==last){ last=k; if(g.userData.beat) g.userData.beat(); } dy=Math.sin((e%period)/period*Math.PI); }
+      }
+    }
+    res.setBias(UP,-dy*0.022); cas.setBias(['chest'],-dy*0.01);
+    cas.tick(); res.tick();
+  };
   return g;
 }
 /* Sight-picture board: correct / post high / post off-centre */
@@ -605,7 +704,7 @@ function buildSight(){
   const leg=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.04,0.04), new THREE.MeshStandardMaterial({color:0xc9a24a})); leg.position.set(0,-0.03,0); g.add(leg);
   return g;
 }
-function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): type==='rifle'?buildRifle(): type==='figure'?buildFigure(): type==='sight'?buildSight(): new THREE.Group(); }
+function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): type==='rifle'?buildRifle(): type==='figure'?buildFigure(): type==='sight'?buildSight(): type==='aid'?buildAid(): new THREE.Group(); }
 
 function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function labelTexture(text, hl){
@@ -712,7 +811,7 @@ const S = { lesson: lessonById(curId), i:0, hl:-1 };
 
 /* Helper that owns a model group + hotspots inside a parent */
 function makeRig(parent){
-  const rig = {root:new THREE.Group(), model:null, type:null, hs:[], hits:[], meshes:[], target:new THREE.Quaternion(), pointer:null, exp:0, expCur:0};
+  const rig = {root:new THREE.Group(), model:null, type:null, hs:[], hits:[], meshes:[], target:new THREE.Quaternion(), pointer:null, exp:0, expCur:0, status:''};
   parent.add(rig.root);
   const pm=new THREE.Mesh(new THREE.SphereGeometry(0.02,16,12), new THREE.MeshBasicMaterial({color:0xe8c978, depthTest:false, transparent:true}));
   pm.renderOrder=40; pm.raycast=noRay;
@@ -724,6 +823,7 @@ function makeRig(parent){
     if(slide.model!==rig.type){
       if(rig.model){ rig.root.remove(rig.model); disposeTree(rig.model); }
       rig.model=buildModel(slide.model); rig.type=slide.model; rig.root.add(rig.model); fresh=true;
+      rig.model.userData.beat=()=>{ if(rig.onBeat) rig.onBeat(); };
       rig.root.quaternion.identity(); rig.target.identity();
     }
     rig.exp = slide.explode?1:0; if(fresh) rig.expCur=rig.exp;
@@ -741,7 +841,8 @@ function makeRig(parent){
       const P=M.userData.parts; for(const k in P) P[k].obj.position.copy(P[k].off).multiplyScalar(rig.expCur);
       rig.hs.forEach(h=>{ if(h.part && P[h.part]) h.grp.position.copy(h.base).add(P[h.part].obj.position); });
     }
-    if(M.userData.tick) M.userData.tick();
+    if(M.userData.tick) M.userData.tick(t);
+    const st=M.userData.status||''; if(st!==rig.status){ rig.status=st; if(rig.onStatus) rig.onStatus(st); }
     if(M.userData.needle) M.userData.needle.rotation.y=Math.sin(t/900)*0.06;
   };
   rig.setHL = function(i){ rig.hs.forEach((h,k)=>{ const on=k===i; h.sp.material.map=h.tex[on?1:0]; h.sp.material.needsUpdate=true; h.dot.scale.setScalar(on?1.8:1); }); };
@@ -772,7 +873,11 @@ function startBoard(){
   scene.add(new THREE.HemisphereLight(0xffffff,0x334466,0.9));
   const dl=new THREE.DirectionalLight(0xffffff,0.7); dl.position.set(1,2,1.5); scene.add(dl);
   const rig=makeRig(scene);
-  let zoom=1;
+  let zoom=1, bactx=null;
+  const initAudio=()=>{ try{ if(!bactx) bactx=new (window.AudioContext||window.webkitAudioContext)(); if(bactx.state==='suspended') bactx.resume(); }catch(e){} };
+  addEventListener('pointerdown',initAudio); addEventListener('keydown',initAudio);
+  rig.onBeat=()=>{ if(!bactx) return; const o=bactx.createOscillator(), gn=bactx.createGain(), t=bactx.currentTime; o.frequency.value=1050; gn.gain.setValueAtTime(.12,t); gn.gain.exponentialRampToValueAtTime(.0001,t+.06); o.connect(gn).connect(bactx.destination); o.start(t); o.stop(t+.08); };
+  rig.onStatus=(st)=>{ const el=$('#bStat'); el.hidden=!st; el.textContent=st; };
   B={renderer,scene,camera,rig};
 
   function sizeIt(){
@@ -898,6 +1003,7 @@ function startBoard(){
       m.addEventListener('change',()=>{ sl.model=m.value; sl.hotspots=sl.hotspots.filter(h=>h.p); openEditor(true,k); });
       const xo=c.querySelector('.xopt');
       if(sl.model==='rifle'){ xo.innerHTML='<label style="display:flex;gap:8px;align-items:center;font-size:15px"><input type="checkbox" id="sx'+k+'"> عرض السلاح مفككًا في هذه الخطوة</label>'; const cb=xo.querySelector('input'); cb.checked=!!sl.explode; cb.addEventListener('change',()=>sl.explode=cb.checked); }
+      else if(sl.model==='aid'){ xo.className='field xopt'; xo.innerHTML='<label for="sa'+k+'">المشهد</label><select id="sa'+k+'"></select>'; const ps=xo.querySelector('select'); Object.keys(AID_NAMES).forEach(key=>{ const o=document.createElement('option'); o.value=key; o.textContent=AID_NAMES[key]; ps.appendChild(o); }); ps.value=AID_NAMES[sl.pose]?sl.pose:'assess'; sl.pose=ps.value; ps.addEventListener('change',()=>sl.pose=ps.value); }
       else if(sl.model==='figure'){ xo.className='field xopt'; xo.innerHTML='<label for="so'+k+'">الوضعية</label><select id="so'+k+'"></select>'; const ps=xo.querySelector('select'); Object.keys(POSE_NAMES).forEach(key=>{ const o=document.createElement('option'); o.value=key; o.textContent=POSE_NAMES[key]; ps.appendChild(o); }); ps.value=sl.pose||'standing'; ps.addEventListener('change',()=>sl.pose=ps.value); }
       const p=c.querySelector('#sp'+k); p.value=sl.points.join('\n'); p.addEventListener('input',()=>sl.points=p.value.split('\n'));
       const hl=c.querySelector('.hsl');
@@ -1017,6 +1123,7 @@ function startHeadset(){
   const stage=new THREE.Group(); stage.position.copy(STAGE0); stage.scale.setScalar(0.6); scene.add(stage);
   const baseScale=()=>((VIEW[rig.type]&&VIEW[rig.type].xr)||0.6)*zf;
   const rig=makeRig(stage);
+  rig.onStatus=()=>drawPanel(); rig.onBeat=()=>beep(1050,.05);
   const ringUnder=new THREE.Mesh(new THREE.RingGeometry(0.55,0.57,64), new THREE.MeshBasicMaterial({color:0xc9a24a, side:THREE.DoubleSide, transparent:true, opacity:.7}));
   ringUnder.rotation.x=-Math.PI/2; ringUnder.position.y=-0.055; ringUnder.raycast=noRay; stage.add(ringUnder);
 
@@ -1035,6 +1142,7 @@ function startHeadset(){
     rr(x,4,4,W-8,Hh-8,34); x.fillStyle='rgba(10,22,48,0.94)'; x.fill(); x.lineWidth=4; x.strokeStyle=PAL.gold; x.stroke();
     txt(L.title, W-44, 52, 26, PAL.mute, 500);
     txt((S.i+1)+' / '+L.slides.length, 44, 52, 30, PAL.gold2, 800, 'left');
+    if(rig.status){ x.font='800 30px '+FONT; const sw=x.measureText(rig.status).width+36; rr(x,40,84,sw,52,14); x.fillStyle=PAL.gold2; x.fill(); txt(rig.status, 40+sw/2, 111, 30, PAL.navy, 800, 'center'); }
     x.fillStyle=PAL.gold; x.fillRect(W-44-90, 82, 90, 4);
     txt(sl.title, W-44, 134, 50, PAL.ink, 800);
     x.font='500 30px '+FONT; let y=200; const maxW=W-130;
