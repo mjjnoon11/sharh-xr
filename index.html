@@ -59,6 +59,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
 /* ---------- board ---------- */
 #board header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-block:calc(10px + env(safe-area-inset-top,0px)) 10px;border-bottom:1px solid var(--line);background:var(--surface)}
 #board header .ttl{font-weight:800;font-size:20px;flex:1 1 220px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lsel{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;max-width:100%}
 .code{font-family:var(--f-data);font-weight:700;color:var(--ink);font-size:17px;letter-spacing:.12em}
 .main{position:relative;flex:1;min-height:0;display:grid;grid-template-columns:minmax(280px,34%) minmax(0,1fr)}
 .side{min-width:0;overflow-y:auto;padding-block:28px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:18px;background:var(--bg)}
@@ -150,7 +151,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
 <!-- ================= BOARD ================= -->
 <section id="board" class="view" hidden>
   <header class="pad">
-    <div class="ttl" id="bTitle">—</div>
+    <select class="ttl lsel" id="bLesson" aria-label="اختيار الدرس"></select>
     <span class="pill">رمز الربط <span class="code ltr" id="bCode">----</span></span>
     <span class="pill"><span class="dot" id="bDot"></span><span id="bStatus">جارٍ التشغيل…</span></span>
     <button class="btn mini" id="bEdit">تعديل الدرس</button>
@@ -193,7 +194,8 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
       <strong style="font-size:18px">تعديل الدرس</strong><span class="grow"></span>
       <button class="btn mini" id="eImport">استيراد ملف</button>
       <button class="btn mini" id="eExport">تصدير ملف</button>
-      <button class="btn mini" id="eSample">الدرس النموذجي</button>
+      <button class="btn mini" id="eNew">+ درس جديد</button>
+      <button class="btn mini" id="eSample">النسخة الأصلية</button>
       <input type="file" id="eFile" accept=".json,application/json" hidden>
     </div>
     <div class="ed-body" id="eBody"></div>
@@ -213,6 +215,10 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
   <div class="hs-wrap">
     <div class="eyebrow">نظارة المدرّب · تعمل وحدها</div>
     <h1 style="font-size:clamp(32px,6vw,52px)">ابدأ الشرح من النظارة</h1>
+    <div class="field">
+      <label for="hLesson">الدرس</label>
+      <select id="hLesson" class="lsel" style="font-size:18px;padding:12px"></select>
+    </div>
     <p class="status" id="hStatus">جارٍ فحص دعم النظارة…</p>
     <div class="actions">
       <button class="btn primary" id="hAR" disabled>دخول الواقع المختلط</button>
@@ -282,7 +288,29 @@ const SAMPLE = {
      hotspots:[{label:'الإبرة',a:'needle'},{label:'خط القراءة',a:'index'}]}
   ]
 };
-const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', none:'بدون مجسّم'};
+const FIRE = {
+  title:'استخدام طفاية الحريق',
+  slides:[
+    {title:'أجزاء الطفاية', model:'extinguisher',
+     points:['الأسطوانة: تحتوي مادة الإطفاء تحت الضغط','مسمار الأمان: يمنع الضغط على المقبض بالخطأ','مقياس الضغط: يبيّن هل الطفاية جاهزة','الخرطوم والفوهة: لتوجيه المادة إلى قاعدة النار'],
+     hotspots:[{label:'مسمار الأمان',a:'pin'},{label:'المقبض',a:'handle'},{label:'مقياس الضغط',a:'gauge'},{label:'الفوهة',a:'nozzle'},{label:'الأسطوانة',a:'body'}]},
+    {title:'أنواع الحرائق (تصنيف NFPA)', model:'extinguisher',
+     points:['A: مواد صلبة عادية كالخشب والورق والقماش','B: سوائل قابلة للاشتعال كالبنزين والديزل','C: معدات كهربائية موصولة بالتيار','D: معادن قابلة للاشتعال كالمغنيسيوم','K: زيوت الطبخ في المطابخ'],
+     hotspots:[{label:'لوحة الاستخدام ABC',a:'label'}]},
+    {title:'فحص الجاهزية', model:'extinguisher',
+     points:['مؤشر الضغط في المنطقة الخضراء','مسمار الأمان والختم في مكانهما','لا صدأ ولا تشقق في الأسطوانة أو الخرطوم','تاريخ الفحص الدوري ساري على البطاقة'],
+     hotspots:[{label:'مقياس الضغط',a:'gauge'},{label:'مسمار الأمان',a:'pin'},{label:'بطاقة الفحص',a:'tag'},{label:'الخرطوم',a:'hose'}]},
+    {title:'طريقة PASS', model:'extinguisher',
+     points:['اسحب مسمار الأمان','وجّه الفوهة إلى قاعدة النار، لا إلى اللهب','اضغط المقبض بثبات','حرّك الفوهة يمينًا ويسارًا حتى تغطي القاعدة'],
+     hotspots:[{label:'١. اسحب',a:'pin'},{label:'٢. وجّه',a:'nozzle'},{label:'٣. اضغط',a:'handle'}]},
+    {title:'السلامة أثناء الإطفاء', model:'extinguisher',
+     points:['قف على بعد 2 إلى 3 أمتار من النار','اجعل الريح ومخرج الطوارئ خلفك','لا تستخدم الماء على حرائق الكهرباء أو الزيوت','إذا لم تنطفئ النار خلال ثوانٍ فاخرج وأبلغ الدفاع المدني على 998'],
+     hotspots:[{label:'الفوهة',a:'nozzle'}]}
+  ]
+};
+const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}];
+const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', none:'بدون مجسّم'};
+const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}};
 
 function validLesson(L){
   return L && typeof L==='object' && Array.isArray(L.slides) && L.slides.length>0 &&
@@ -310,6 +338,7 @@ const at=(x,z,up)=>[x, H(x,z)+(up||0.012), z];
 const ANCHORS = {
   terrain:{peakA:at(-0.16,-0.075), peakB:at(0.19,0.135), saddle:at(0.056,0.054), steep:at(-0.05,-0.075), gentle:at(0.33,0.32), spur:at(-0.32,-0.27), valley:at(-0.1,0.27), north:[0,0.05,-0.47]},
   compass:{needle:[0,0.075,-0.24], deg:[0.27,0.05,0.22], mils:[-0.17,0.05,0.13], index:[0,0.1,-0.46]},
+  extinguisher:{pin:[0.02,0.575,0.095], handle:[0.17,0.615,0], gauge:[-0.035,0.535,0.05], nozzle:[-0.125,0.09,0.06], body:[0.07,0.03,0.09], label:[0,0.2,0.115], tag:[0.06,0.45,0.075], hose:[-0.13,0.3,0.03]},
   none:{}
 };
 function hotspotPos(slide,h){ if(h.p) return h.p; const A=ANCHORS[slide.model]||{}; return A[h.a]||[0,0.1,0]; }
@@ -395,7 +424,50 @@ function buildCompass(){
   const glass=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.004,64), new THREE.MeshStandardMaterial({color:0xffffff, transparent:true, opacity:.08, roughness:0})); glass.position.y=0.1; g.add(glass);
   return g;
 }
-function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): new THREE.Group(); }
+function canvasTex(w,h,draw){ const cv=document.createElement('canvas'); cv.width=w; cv.height=h; draw(cv.getContext('2d'),w,h); const t=new THREE.CanvasTexture(cv); t.anisotropy=8; return t; }
+function buildExtinguisher(){
+  const g=new THREE.Group();
+  const red=new THREE.MeshStandardMaterial({color:0xc4302b, roughness:.35, metalness:.25});
+  const metal=new THREE.MeshStandardMaterial({color:0xb9c0cc, roughness:.3, metalness:.8});
+  const black=new THREE.MeshStandardMaterial({color:0x1b1e24, roughness:.7});
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.42,48), red); body.position.y=0.16; g.add(body);
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(0.11,48,16,0,Math.PI*2,0,Math.PI/2), red); dome.position.y=0.37; g.add(dome);
+  const foot=new THREE.Mesh(new THREE.CylinderGeometry(0.113,0.113,0.025,48), black); foot.position.y=-0.037; g.add(foot);
+  // label band: white panel facing +Z
+  const lt=canvasTex(1024,256,(x,W,Hh)=>{
+    x.fillStyle='#c4302b'; x.fillRect(0,0,W,Hh);
+    x.fillStyle='#f4f1ea'; x.fillRect(W*0.32,0,W*0.36,Hh);
+    x.fillStyle='#c4302b'; x.font='800 76px '+FONT; x.textAlign='center'; x.textBaseline='middle'; x.fillText('ABC',W/2,72);
+    x.fillStyle='#1b1e24'; x.font='700 30px '+FONT; x.direction='rtl'; x.fillText('مسحوق كيميائي جاف',W/2,140);
+    x.font='600 24px '+FONT; x.fillText('6 كجم',W/2,196);
+  });
+  const band=new THREE.Mesh(new THREE.CylinderGeometry(0.1115,0.1115,0.2,48,1,true), new THREE.MeshStandardMaterial({map:lt, roughness:.5}));
+  band.position.y=0.17; band.rotation.y=Math.PI; g.add(band);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.035,0.04,24), metal); neck.position.y=0.495; g.add(neck);
+  const valve=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.05,0.06), metal); valve.position.y=0.535; g.add(valve);
+  const carry=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.014,0.036), black); carry.position.set(0.09,0.555,0); g.add(carry);
+  const lever=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.014,0.036), black); lever.position.set(0.09,0.6,0); lever.rotation.z=0.14; g.add(lever);
+  const pinMat=new THREE.MeshStandardMaterial({color:0xe8c33a, roughness:.4, metalness:.5});
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.1,10), pinMat); pin.rotation.x=Math.PI/2; pin.position.set(0.02,0.575,0.02); g.add(pin);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.022,0.005,10,32), pinMat); ring.position.set(0.02,0.575,0.09); g.add(ring);
+  const gt=canvasTex(256,256,(x,W)=>{
+    const c=W/2; x.fillStyle='#f4f1ea'; x.beginPath(); x.arc(c,c,c,0,Math.PI*2); x.fill();
+    const arc=(a0,a1,col)=>{ x.strokeStyle=col; x.lineWidth=34; x.beginPath(); x.arc(c,c,c*0.66,a0,a1); x.stroke(); };
+    arc(Math.PI*0.8,Math.PI*1.25,'#d8503f'); arc(Math.PI*1.25,Math.PI*1.75,'#2f9e5b'); arc(Math.PI*1.75,Math.PI*2.2,'#d8503f');
+    x.strokeStyle='#1b1e24'; x.lineWidth=10; x.beginPath(); x.moveTo(c,c); x.lineTo(c+Math.cos(Math.PI*1.5)*c*0.72, c+Math.sin(Math.PI*1.5)*c*0.72); x.stroke();
+    x.fillStyle='#1b1e24'; x.beginPath(); x.arc(c,c,14,0,Math.PI*2); x.fill();
+  });
+  const gauge=new THREE.Mesh(new THREE.CylinderGeometry(0.026,0.026,0.014,32), metal); gauge.rotation.x=Math.PI/2; gauge.position.set(-0.035,0.535,0.036); g.add(gauge);
+  const face=new THREE.Mesh(new THREE.CircleGeometry(0.022,32), new THREE.MeshBasicMaterial({map:gt})); face.position.set(-0.035,0.535,0.0435); g.add(face);
+  const curve=new THREE.CatmullRomCurve3([new THREE.Vector3(-0.045,0.53,0), new THREE.Vector3(-0.1,0.5,0.0), new THREE.Vector3(-0.13,0.38,0.02), new THREE.Vector3(-0.128,0.24,0.04), new THREE.Vector3(-0.125,0.14,0.05)]);
+  const hose=new THREE.Mesh(new THREE.TubeGeometry(curve,40,0.011,10,false), black); g.add(hose);
+  const nozzle=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.02,0.06,16), black); nozzle.position.set(-0.125,0.11,0.05); g.add(nozzle);
+  const tt=canvasTex(128,192,(x,W,Hh)=>{ x.fillStyle='#f1c232'; x.fillRect(0,0,W,Hh); x.fillStyle='#1b1e24'; x.font='800 30px '+FONT; x.textAlign='center'; x.direction='rtl'; x.fillText('فحص',W/2,48); x.font='600 20px '+FONT; x.fillText('دوري',W/2,84); x.fillRect(20,110,W-40,3); x.fillRect(20,140,W-40,3); x.fillRect(20,170,W-40,3); });
+  const tag=new THREE.Mesh(new THREE.PlaneGeometry(0.045,0.068), new THREE.MeshBasicMaterial({map:tt, side:THREE.DoubleSide})); tag.position.set(0.06,0.445,0.07); tag.rotation.set(-0.15,0.25,0.06); g.add(tag);
+  const str=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0.03,0.5,0.025),new THREE.Vector3(0.06,0.479,0.07)]), new THREE.LineBasicMaterial({color:0x1b1e24})); str.raycast=noRay; g.add(str);
+  return g;
+}
+function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): new THREE.Group(); }
 
 function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function labelTexture(text, hl){
@@ -412,14 +484,15 @@ function buildHotspots(slide){
   (slide.hotspots||[]).forEach((h,i)=>{
     const p=hotspotPos(slide,h);
     const grp=new THREE.Group(); grp.position.set(p[0],p[1],p[2]);
+    const up=0.075+(i%2)*0.075;
     const dot=new THREE.Mesh(new THREE.SphereGeometry(0.014,16,12), new THREE.MeshBasicMaterial({color:0xe8c978}));
     const hit=new THREE.Mesh(new THREE.SphereGeometry(0.045,10,8), new THREE.MeshBasicMaterial({visible:false}));
     hit.userData.hotspot=i;
-    const lineGeo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0.075,0)]);
+    const lineGeo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,up,0)]);
     const line=new THREE.Line(lineGeo, new THREE.LineBasicMaterial({color:0xe8c978})); line.raycast=noRay;
     const n=labelTexture(h.label||'—',false), hlt=labelTexture(h.label||'—',true);
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:n.t, depthTest:false, transparent:true}));
-    const lh=0.055; sp.scale.set(lh*n.aspect, lh, 1); sp.position.y=0.075+lh/2; sp.renderOrder=30; sp.raycast=noRay;
+    const lh=0.055; sp.scale.set(lh*n.aspect, lh, 1); sp.position.y=up+lh/2; sp.renderOrder=30; sp.raycast=noRay;
     grp.add(dot,hit,line,sp);
     list.push({grp, dot, hit, sp, tex:[n.t,hlt.t]});
   });
@@ -486,8 +559,18 @@ setInterval(()=>{ if(Link.role) Link.send({t:'ping'}); }, 2000);
 /* =====================================================================
    SHARED LESSON STATE
    ===================================================================== */
-const S = { lesson: normalizeLesson(store.get('sharh.lesson', SAMPLE)), i:0, hl:-1 };
-if(!validLesson(S.lesson)) S.lesson = clone(SAMPLE);
+/* Library: built-in lessons + per-device edits stored by lesson id */
+function customs(){ const c=store.get('sharh.custom',{}); return (c&&typeof c==='object')?c:{}; }
+function lessonById(id){
+  const c=customs()[id]; if(c && validLesson(c)) return normalizeLesson(c);
+  const b=LIBRARY.find(x=>x.id===id); return normalizeLesson(clone((b||LIBRARY[0]).lesson));
+}
+function libraryIds(){ const ids=LIBRARY.map(x=>x.id); Object.keys(customs()).forEach(k=>{ if(!ids.includes(k)) ids.push(k); }); return ids; }
+function fillLessonSelect(sel, cur){
+  sel.textContent=''; libraryIds().forEach(id=>{ const o=document.createElement('option'); o.value=id; o.textContent=lessonById(id).title; sel.appendChild(o); }); sel.value=cur;
+}
+let curId = store.get('sharh.cur','map'); if(!libraryIds().includes(curId)) curId='map';
+const S = { lesson: lessonById(curId), i:0, hl:-1 };
 
 /* Helper that owns a model group + hotspots inside a parent */
 function makeRig(parent){
@@ -545,7 +628,7 @@ function startBoard(){
     const r=box.getBoundingClientRect(); const w=Math.max(1,r.width), h=Math.max(1,r.height);
     renderer.setSize(w,h,false); camera.aspect=w/h;
     const fit = camera.aspect<1 ? 1.6/camera.aspect*0.8 : 1.35;
-    const d=fit*zoom; camera.position.set(0, d*0.62, d*0.9); camera.lookAt(0,0.04,0); camera.updateProjectionMatrix();
+    const v=VIEW[rig.type]||{y:0.04,h:0.62,d:1}; const d=fit*zoom*v.d; camera.position.set(0, v.y+d*v.h, d*0.9); camera.lookAt(0,v.y,0); camera.updateProjectionMatrix();
     sizeInk();
   }
   function bg(){ const v=getComputedStyle(document.documentElement).getPropertyValue('--stage').trim()||'#0d1c3d'; scene.background=new THREE.Color(v); }
@@ -559,7 +642,7 @@ function startBoard(){
   // ---- slide rendering
   function renderSide(){
     const L=S.lesson, sl=L.slides[S.i];
-    $('#bTitle').textContent=L.title;
+    const lsel=$('#bLesson'); if(lsel.value!==curId || !lsel.selectedOptions[0] || lsel.selectedOptions[0].textContent!==L.title) fillLessonSelect(lsel,curId);
     $('#bStep').textContent='الخطوة '+(S.i+1)+' من '+L.slides.length;
     $('#bSlideTitle').textContent=sl.title;
     const ul=$('#bPoints'); ul.textContent='';
@@ -572,12 +655,16 @@ function startBoard(){
   function setSlide(i, remote){
     const n=S.lesson.slides.length; i=Math.max(0,Math.min(n-1,i|0));
     const changed = i!==S.i || !rig.model;
-    S.i=i; S.hl=-1;
-    rig.load(S.lesson.slides[i]); rig.pointer.visible=false;
+    S.i=i; S.hl=-1; const prevType=rig.type;
+    rig.load(S.lesson.slides[i]); rig.pointer.visible=false; if(prevType!==rig.type) sizeIt();
     renderSide(); redrawInk();
     if(!remote){ Link.send({t:'slide', i}); if(changed) Link.send({t:'rot', q:rig.target.toArray()}); }
   }
   B.setSlide=setSlide;
+  $('#bLesson').addEventListener('change',e=>{
+    curId=e.target.value; store.set('sharh.cur',curId); S.lesson=lessonById(curId); inkBy={}; rig.type=null; S.i=0;
+    setSlide(0,true); Link.send({t:'lesson', lesson:S.lesson, i:0}); Link.send({t:'rot', q:rig.target.toArray()}); e.target.blur();
+  });
   $('#bPrev').addEventListener('click',()=>setSlide(S.i-1));
   $('#bNext').addEventListener('click',()=>setSlide(S.i+1));
   $('#bReset').addEventListener('click',()=>{ rig.target.identity(); zoom=1; sizeIt(); Link.send({t:'rot',q:rig.target.toArray()}); });
@@ -626,15 +713,16 @@ function startBoard(){
 
   // ---- placement of new hotspots (from editor)
   let placing=null;
-  function beginPlace(slideIdx){ placing={slideIdx}; $('#editor').hidden=true; setSlide(slideIdx); $('#placeBanner').hidden=false; $('#placeText').textContent='انقر على المجسّم في الموضع الذي تريد وضع النقطة فيه'; }
+  function beginPlace(slideIdx){ placing={slideIdx}; $('#editor').hidden=true; rig.load(draft.slides[slideIdx]); sizeIt(); $('#placeBanner').hidden=false; $('#placeText').textContent='انقر على المجسّم في الموضع الذي تريد وضع النقطة فيه'; }
   function cancelPlace(){ placing=null; $('#placeBanner').hidden=true; $('#editor').hidden=false; }
   function finishPlace(p){ const k=placing.slideIdx; placing=null; $('#placeBanner').hidden=true; draft.slides[k].hotspots.push({label:'نقطة جديدة', p}); openEditor(true, k); }
   $('#placeCancel').addEventListener('click',cancelPlace);
 
   // ---- editor
-  let draft=null;
+  let draft=null, draftId=null;
   function openEditor(keep, focusSlide){
-    if(!keep) draft=clone(S.lesson);
+    if(!keep){ draft=clone(S.lesson); draftId=curId; }
+    $('#eSample').disabled=!LIBRARY.some(x=>x.id===draftId);
     $('#eMsg').textContent='';
     const body=$('#eBody'); body.textContent='';
     const tf=document.createElement('div'); tf.className='field';
@@ -677,16 +765,18 @@ function startBoard(){
   }
   function commitDraftPoints(){ draft.slides.forEach(s=>s.points=s.points.map(x=>x.trim()).filter(Boolean)); }
   $('#bEdit').addEventListener('click',()=>openEditor(false));
-  $('#eCancel').addEventListener('click',()=>{ $('#editor').hidden=true; draft=null; setSlide(S.i,true); });
+  $('#eCancel').addEventListener('click',()=>{ $('#editor').hidden=true; draft=null; rig.type=null; setSlide(S.i,true); });
   $('#eAdd').addEventListener('click',()=>{ draft.slides.push({title:'خطوة جديدة',model:'none',points:[],hotspots:[]}); openEditor(true,draft.slides.length-1); });
   $('#eSave').addEventListener('click',()=>{
     commitDraftPoints();
-    const L=normalizeLesson(draft); S.lesson=L; store.set('sharh.lesson',L);
+    const L=normalizeLesson(draft); S.lesson=L;
+    const cs=customs(); cs[draftId]=L; store.set('sharh.custom',cs); curId=draftId; store.set('sharh.cur',curId); fillLessonSelect($('#bLesson'),curId);
     $('#editor').hidden=true; draft=null; rig.type=null; inkBy={};
     setSlide(Math.min(S.i,L.slides.length-1),true);
     Link.send({t:'lesson', lesson:L, i:S.i});
   });
-  $('#eSample').addEventListener('click',()=>{ draft=clone(SAMPLE); openEditor(true,0); $('#eMsg').textContent='حُمّل الدرس النموذجي. اضغط «حفظ» لاعتماده.'; });
+  $('#eSample').addEventListener('click',()=>{ const b=LIBRARY.find(x=>x.id===draftId); if(!b) return; draft=normalizeLesson(clone(b.lesson)); openEditor(true,0); $('#eMsg').textContent='رجعت النسخة الأصلية. اضغط «حفظ» لاعتمادها.'; });
+  $('#eNew').addEventListener('click',()=>{ draftId='u'+Date.now(); draft={title:'درس جديد',slides:[{title:'الخطوة الأولى',model:'none',points:['اكتب النقطة الأولى هنا'],hotspots:[]}]}; openEditor(true,0); $('#eMsg').textContent='درس جديد. اضغط «حفظ» ليظهر في قائمة الدروس.'; });
   $('#eExport').addEventListener('click',()=>{
     commitDraftPoints();
     try{ const blob=new Blob([JSON.stringify(normalizeLesson(draft),null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(draft.title||'lesson').replace(/[\\/:*?"<>|]/g,'_')+'.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); $('#eMsg').textContent='صُدّر ملف الدرس.'; }catch(e){ $('#eMsg').textContent='تعذّر التصدير في هذا المتصفح.'; }
@@ -694,7 +784,7 @@ function startBoard(){
   $('#eImport').addEventListener('click',()=>$('#eFile').click());
   $('#eFile').addEventListener('change',e=>{
     const f=e.target.files[0]; if(!f) return; const r=new FileReader();
-    r.onload=()=>{ try{ const L=JSON.parse(r.result); if(!validLesson(L)) throw 0; draft=normalizeLesson(L); openEditor(true,0); $('#eMsg').textContent='استُورد الدرس. اضغط «حفظ» لاعتماده.'; }catch(err){ $('#eMsg').textContent='الملف ليس ملف درس صالحًا.'; } };
+    r.onload=()=>{ try{ const L=JSON.parse(r.result); if(!validLesson(L)) throw 0; draft=normalizeLesson(L); draftId='u'+Date.now(); openEditor(true,0); $('#eMsg').textContent='استُورد الدرس. اضغط «حفظ» لاعتماده.'; }catch(err){ $('#eMsg').textContent='الملف ليس ملف درس صالحًا.'; } };
     r.readAsText(f); e.target.value='';
   });
 
@@ -824,7 +914,7 @@ function startHeadset(){
   function setSlide(i, remote){
     const n=S.lesson.slides.length; i=Math.max(0,Math.min(n-1,i|0));
     const changed=i!==S.i||!rig.model;
-    S.i=i; S.hl=-1; rig.load(S.lesson.slides[i]); rig.root.quaternion.copy(rig.target);
+    S.i=i; S.hl=-1; rig.load(S.lesson.slides[i]); rig.root.quaternion.copy(rig.target); stage.scale.setScalar((VIEW[rig.type]&&VIEW[rig.type].xr)||0.6);
     drawPanel();
     if(!remote){ Link.send({t:'slide',i}); if(changed) Link.send({t:'rot',q:rig.root.quaternion.toArray()}); }
   }
@@ -938,7 +1028,7 @@ function startHeadset(){
 
   // ---- link
   Link.onMsg=(m)=>{
-    if(m.t==='lesson' && validLesson(m.lesson)){ S.lesson=normalizeLesson(m.lesson); store.set('sharh.lesson.hs',S.lesson); rig.type=null; setSlide(typeof m.i==='number'?m.i:S.i,true); }
+    if(m.t==='lesson' && validLesson(m.lesson)){ S.lesson=normalizeLesson(m.lesson); rig.type=null; setSlide(typeof m.i==='number'?m.i:S.i,true); }
     else if(m.t==='slide'){ setSlide(m.i,true); }
     else if(m.t==='rot' && Array.isArray(m.q) && !drag && !mdrag){ rig.target.fromArray(m.q); rig.root.quaternion.copy(rig.target); }
   };
@@ -991,7 +1081,8 @@ function startHeadset(){
   });
 
   // ---- init
-  const own=store.get('sharh.lesson.hs',null); if(own && validLesson(own)) S.lesson=normalizeLesson(own);
+  const hsel=$('#hLesson'); fillLessonSelect(hsel,curId);
+  hsel.addEventListener('change',()=>{ curId=hsel.value; store.set('sharh.cur',curId); S.lesson=lessonById(curId); rig.type=null; S.i=0; setSlide(0,true); });
   setSlide(0,true); drawPanel();
   HS={setSlide, rig, drawPanel};
 
