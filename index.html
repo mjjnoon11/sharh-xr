@@ -177,6 +177,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
     <button class="btn" id="bPrev">→ السابق</button>
     <button class="btn primary" id="bNext">التالي ←</button>
     <button class="btn" id="bReset">إعادة الوضع</button>
+    <button class="btn" id="bExplode" hidden>تفكيك</button>
     <span class="grow"></span>
     <button class="btn" id="bPen">✎ قلم</button>
     <button class="sw" data-c="#e8c978" style="background:#e8c978" aria-label="ذهبي"></button>
@@ -230,6 +231,7 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(36px,7vw,64px);l
       <li><b>تدوير المجسّم</b>صوّب عليه واضغط الزناد مع الاستمرار، ثم أدِر معصمك.</li>
       <li><b>الإشارة</b>وجّه الشعاع إلى أي جزء فيظهر اسمه بالذهبي.</li>
       <li><b>الخطوات</b>زر A للتالي وB للسابق، أو أزرار اللوحة العائمة.</li>
+      <li><b>التحريك والتكبير</b>اضغط القبضة الجانبية وحرّك يدك لنقل المجسّم، وحرّك العصا للأعلى والأسفل للتكبير.</li>
     </ul>
     <div class="scard">
       <strong style="font-size:18px">العرض على البروجكتر من النظارة مباشرة</strong>
@@ -308,9 +310,39 @@ const FIRE = {
      hotspots:[{label:'الفوهة',a:'nozzle'}]}
   ]
 };
-const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}];
-const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', none:'بدون مجسّم'};
-const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}};
+const MARKS = {
+  title:'الرماية والتصويب',
+  slides:[
+    {title:'قواعد السلامة الأربع', model:'rifle',
+     points:['تعامل مع كل سلاح كأنه محشو دائمًا','لا توجّه الفوهة إلى شيء لا تنوي إصابته','أبقِ إصبعك خارج واقي الزناد حتى تقرر الرمي','تأكد من هدفك وما خلفه قبل الرمي'],
+     hotspots:[{label:'الفوهة',a:'muzzle'},{label:'الزناد',a:'trigger'},{label:'مفتاح الأمان',a:'safety'}]},
+    {title:'الأجزاء الرئيسية', model:'rifle',
+     points:['الجسم العلوي: يضم السبطانة وأجهزة التصويب','الجسم السفلي: يضم مقبض المسدس والزناد ومفتاح الأمان','الأخمص: يرتكز على الكتف','المخزن: يغذّي السلاح بالذخيرة'],
+     hotspots:[{label:'الجسم العلوي',a:'upper'},{label:'السبطانة',a:'barrel'},{label:'الواقي اليدوي',a:'handguard'},{label:'الجسم السفلي',a:'lower'},{label:'مقبض المسدس',a:'grip'},{label:'الأخمص',a:'stock'},{label:'المخزن',a:'mag'}]},
+    {title:'التفكيك الميداني', model:'rifle', explode:true,
+     points:['ضع مفتاح الأمان على «أمان» وأخرج المخزن','اسحب مقبض الشد وافحص الحجرة بالنظر للتأكد أنها فارغة','افصل الجسمين العلوي والسفلي، ثم أخرج حامل الترباس ومقبض الشد','التركيب بعكس الترتيب، ثم فحص وظيفي حسب تعليمات وحدتك'],
+     hotspots:[{label:'١. المخزن',a:'mag'},{label:'٢. الجسم السفلي',a:'lower'},{label:'٣. حامل الترباس',a:'bcg'},{label:'٤. مقبض الشد',a:'charging'},{label:'الواقي اليدوي',a:'handguard'},{label:'الجسم العلوي',a:'upper'}]},
+    {title:'وضع الوقوف', model:'figure', pose:'standing',
+     points:['القدمان بعرض الكتفين، والقدم اليسرى متقدمة قليلًا','الأخمص ثابت في تجويف الكتف الأيمن','الخد ملاصق للأخمص في نفس الموضع كل مرة','اليد الداعمة تحت الواقي اليدوي، والمرفق تحت السلاح'],
+     hotspots:[{label:'القدم المتقدمة',a:'footL'},{label:'تجويف الكتف',a:'shoulder'},{label:'ملامسة الخد',a:'cheek'},{label:'اليد الداعمة',a:'support'}]},
+    {title:'وضع الجثو', model:'figure', pose:'kneeling',
+     points:['اجلس على كعب القدم اليمنى','الركبة اليسرى للأمام والساق عمودية تقريبًا','ضع المرفق الأيسر أمام رأس الركبة مباشرة، لا فوقه','أثبت من الوقوف، وأسرع في الاتخاذ من الانبطاح'],
+     hotspots:[{label:'المرفق أمام الركبة',a:'elbowL'},{label:'الجلوس على الكعب',a:'footR'},{label:'ملامسة الخد',a:'cheek'}]},
+    {title:'وضع الانبطاح', model:'figure', pose:'prone',
+     points:['أثبت الأوضاع وأفضلها للدقة','الجسم بزاوية خفيفة خلف السلاح والساقان متباعدتان','المرفقان على الأرض يحملان وزن السلاح','دع العظم يحمل السلاح لا العضلات'],
+     hotspots:[{label:'المرفق الداعم',a:'elbowL'},{label:'يد الزناد',a:'trigger'},{label:'الساقان متباعدتان',a:'footL'}]},
+    {title:'صورة التصويب الصحيحة', model:'sight',
+     points:['انظر من خلال الحلقة الخلفية دون أن تركّز عليها','ضع رأس الشعيرة في منتصف الحلقة تمامًا','ركّز عينك على رأس الشعيرة، فيبدو الهدف ضبابيًا قليلًا','ضع الهدف فوق رأس الشعيرة مباشرة'],
+     hotspots:[{label:'الوضع الصحيح',a:'ok'},{label:'الشعيرة مرتفعة',a:'high'},{label:'الشعيرة منحرفة',a:'side'}]},
+    {title:'التنفس والضغط على الزناد', model:'figure', pose:'prone',
+     points:['تنفّس طبيعيًا، ثم توقف لحظة بعد الزفير','اضغط الزناد ضغطًا مستمرًا بطيئًا دون نتر','لا تتوقع لحظة الإطلاق ولا تغمض عينك','حافظ على التصويب لحظة بعد الإطلاق (المتابعة)'],
+     hotspots:[{label:'إصبع الزناد',a:'trigger'},{label:'ملامسة الخد',a:'cheek'}]}
+  ]
+};
+const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}, {id:'marks', lesson:MARKS}];
+const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', rifle:'سلاح تدريبي (قابل للتفكيك)', figure:'وضعية الرامي', sight:'صورة التصويب', none:'بدون مجسّم'};
+const POSE_NAMES = {standing:'الوقوف', kneeling:'الجثو', prone:'الانبطاح'};
+const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}, rifle:{y:0.04,h:0.45,d:1.2,xr:0.75}, figure:{y:0.26,h:0.32,d:1.6,xr:0.7}, sight:{y:0.28,h:0.12,d:1.22,xr:0.8}};
 
 function validLesson(L){
   return L && typeof L==='object' && Array.isArray(L.slides) && L.slides.length>0 &&
@@ -320,7 +352,7 @@ function normalizeLesson(L){
   const out = {title: String(L.title||'درس بدون عنوان'), slides:[]};
   L.slides.forEach(s=>{
     out.slides.push({
-      title:String(s.title||''), model: MODEL_NAMES[s.model]?s.model:'none',
+      title:String(s.title||''), model: MODEL_NAMES[s.model]?s.model:'none', explode:!!s.explode, pose: POSE_NAMES[s.pose]?s.pose:'standing',
       points:(s.points||[]).map(String).filter(x=>x.trim()),
       hotspots:(Array.isArray(s.hotspots)?s.hotspots:[]).filter(h=>h&&(h.a||Array.isArray(h.p))).map(h=>h.a?{label:String(h.label||''),a:String(h.a)}:{label:String(h.label||''),p:h.p.slice(0,3).map(Number)})
     });
@@ -334,14 +366,23 @@ function normalizeLesson(L){
 const gauss=(x,z,cx,cz,h,s)=>h*Math.exp(-((x-cx)**2+(z-cz)**2)/(2*s*s));
 function H(x,z){ return gauss(x,z,-0.17,-0.08,0.205,0.12)+gauss(x,z,0.2,0.14,0.15,0.1)+gauss(x,z,0.02,0.03,0.07,0.1)+gauss(x,z,-0.3,-0.25,0.07,0.07)+gauss(x,z,-0.38,-0.36,0.04,0.06)+gauss(x,z,0.3,-0.28,0.05,0.07)+0.008; }
 const at=(x,z,up)=>[x, H(x,z)+(up||0.012), z];
+const RX=0.06;
 
 const ANCHORS = {
   terrain:{peakA:at(-0.16,-0.075), peakB:at(0.19,0.135), saddle:at(0.056,0.054), steep:at(-0.05,-0.075), gentle:at(0.33,0.32), spur:at(-0.32,-0.27), valley:at(-0.1,0.27), north:[0,0.05,-0.47]},
   compass:{needle:[0,0.075,-0.24], deg:[0.27,0.05,0.22], mils:[-0.17,0.05,0.13], index:[0,0.1,-0.46]},
   extinguisher:{pin:[0.02,0.575,0.095], handle:[0.17,0.615,0], gauge:[-0.035,0.535,0.05], nozzle:[-0.125,0.09,0.06], body:[0.07,0.03,0.09], label:[0,0.2,0.115], tag:[0.06,0.45,0.075], hose:[-0.13,0.3,0.03]},
+  rifle:{muzzle:rp(-0.67,0.075,0.02,'upper'), barrel:rp(-0.54,0.08,0.02,'upper'), upper:rp(-0.03,0.1,0.02,'upper'), handguard:rp(-0.25,0.105,0.02,'handguard'),
+    bcg:rp(0.08,0.095,0.0,'bcg'), charging:rp(0.2,0.108,0.0,'charging'), lower:rp(0.1,0.045,0.025,'lower'), grip:rp(0.16,-0.075,0.02,'lower'),
+    trigger:rp(0.075,-0.012,0.01,'lower'), safety:rp(0.13,0.03,0.03,'lower'), stock:rp(0.46,0.095,0.02,'stock'), mag:rp(0.02,-0.19,0.0,'mag'),
+    front:rp(-0.44,0.165,0,'upper'), rear:rp(0.17,0.14,0,'upper')},
+  figure:function(slide,k){ const J=poseLocal(slide.pose); const m={shoulder:'butt',cheek:'head',elbowL:'eL',kneeL:'kneeL',trigger:'hR',support:'hL',footL:'footL',footR:'footR'}; const v=J[m[k]]||J.chest; return [v.x,v.y+0.01,v.z]; },
+  sight:{ok:[0.32,0.36,0.012], high:[0,0.36,0.012], side:[-0.32,0.36,0.012]},
   none:{}
 };
-function hotspotPos(slide,h){ if(h.p) return h.p; const A=ANCHORS[slide.model]||{}; return A[h.a]||[0,0.1,0]; }
+function rp(x,y,z,part){ return {p:[x+RX,y,z], part}; }
+function hotspotPos(slide,h){ if(h.p) return h.p; const A=ANCHORS[slide.model]||{}; if(typeof A==='function') return A(slide,h.a); let v=A[h.a]; if(v && !Array.isArray(v)) v=v.p; return v||[0,0.1,0]; }
+function hotspotPart(slide,h){ if(h.p) return null; const A=ANCHORS[slide.model]; if(!A||typeof A==='function') return null; const v=A[h.a]; return (v&&v.part)||null; }
 
 function buildTerrain(){
   const g = new THREE.Group();
@@ -467,7 +508,104 @@ function buildExtinguisher(){
   const str=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0.03,0.5,0.025),new THREE.Vector3(0.06,0.479,0.07)]), new THREE.LineBasicMaterial({color:0x1b1e24})); str.raycast=noRay; g.add(str);
   return g;
 }
-function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): new THREE.Group(); }
+/* Generic training rifle: operator-level assemblies only, exploded view by part offsets */
+function buildRifle(){
+  const g=new THREE.Group(), parts={};
+  const dark=new THREE.MeshStandardMaterial({color:0x2c3036, roughness:.55, metalness:.35});
+  const black=new THREE.MeshStandardMaterial({color:0x17191d, roughness:.7, metalness:.1});
+  const metal=new THREE.MeshStandardMaterial({color:0x9aa2ae, roughness:.3, metalness:.85});
+  const part=(n,off)=>{ const o=new THREE.Group(); g.add(o); parts[n]={obj:o, off:new THREE.Vector3(off[0],off[1],off[2])}; return o; };
+  const box=(pa,sx,sy,sz,x,y,z,m,rz)=>{ const b=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),m); b.position.set(x+RX,y,z); if(rz) b.rotation.z=rz; pa.add(b); return b; };
+  const cyl=(pa,r,x0,x1,y,z,m)=>{ const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,x1-x0,20),m); c.rotation.z=Math.PI/2; c.position.set((x0+x1)/2+RX,y,z); pa.add(c); return c; };
+  const up=part('upper',[0,0,0]);
+  box(up,0.25,0.055,0.05, 0.075,0.075,0, dark);
+  cyl(up,0.012,-0.62,-0.05,0.075,0,metal);
+  cyl(up,0.019,-0.67,-0.62,0.075,0,black);
+  box(up,0.02,0.05,0.016,-0.44,0.12,0,black); box(up,0.006,0.03,0.006,-0.44,0.158,0,black);
+  box(up,0.03,0.03,0.03,0.17,0.117,0,black);
+  const ap=new THREE.Mesh(new THREE.TorusGeometry(0.008,0.003,8,20),black); ap.rotation.y=Math.PI/2; ap.position.set(0.17+RX,0.138,0); up.add(ap);
+  box(up,0.06,0.02,0.003,0.08,0.075,0.026,metal);
+  const hg=part('handguard',[0,0.05,0.16]);
+  cyl(hg,0.03,-0.42,-0.06,0.075,0,black);
+  for(let i=0;i<6;i++) box(hg,0.012,0.004,0.062,-0.38+i*0.055,0.075,0,dark);
+  const bcg=part('bcg',[0.12,0.17,0]);
+  cyl(bcg,0.015,-0.02,0.18,0.08,0,metal); box(bcg,0.03,0.012,0.012,0.05,0.096,0,metal);
+  const ch=part('charging',[0.2,0.28,0]);
+  box(ch,0.13,0.01,0.016,0.16,0.103,0,black); box(ch,0.012,0.012,0.06,0.225,0.103,0,black);
+  const lo=part('lower',[0,-0.13,0]);
+  box(lo,0.24,0.04,0.046,0.08,0.028,0,dark); box(lo,0.07,0.045,0.05,0.0,-0.005,0,dark);
+  box(lo,0.035,0.1,0.032,0.155,-0.035,0,black,-0.35);
+  box(lo,0.075,0.006,0.02,0.08,-0.022,0,black); box(lo,0.006,0.026,0.006,0.075,-0.006,0,metal);
+  const sf=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.052,14),metal); sf.rotation.x=Math.PI/2; sf.position.set(0.13+RX,0.03,0); lo.add(sf);
+  box(lo,0.028,0.006,0.004,0.138,0.03,0.028,metal);
+  const st=part('stock',[0,-0.13,0]);
+  cyl(st,0.016,0.2,0.42,0.07,0,black); box(st,0.16,0.095,0.045,0.46,0.045,0,black); box(st,0.012,0.105,0.048,0.545,0.045,0,dark);
+  const mg=part('mag',[0,-0.3,0]);
+  box(mg,0.062,0.17,0.026,0.008,-0.11,0,dark,0.12);
+  g.userData.parts=parts;
+  return g;
+}
+/* Shooter figure: joints per position, bones drawn between joints, smooth blend between positions */
+const POSES={
+  standing:{head:[-0.04,1.56,0.07],chest:[0.03,1.42,0],pelvis:[0.07,0.98,0],sR:[0.06,1.4,0.17],sL:[-0.01,1.4,-0.17],eR:[0.1,1.22,0.33],hR:[-0.1,1.33,0.1],eL:[-0.2,1.18,-0.1],hL:[-0.4,1.38,0.0],hipL:[0.04,0.95,-0.1],hipR:[0.1,0.95,0.1],kneeL:[-0.04,0.52,-0.15],kneeR:[0.13,0.52,0.15],footL:[-0.1,0.04,-0.18],footR:[0.2,0.04,0.2],butt:[0.04,1.4,0.11],muzzle:[-0.86,1.44,0.04]},
+  kneeling:{head:[0.0,1.05,0.07],chest:[0.08,0.92,0],pelvis:[0.2,0.5,0],sR:[0.1,0.9,0.17],sL:[0.04,0.9,-0.17],eR:[0.14,0.72,0.33],hR:[-0.08,0.84,0.1],eL:[-0.22,0.6,-0.12],hL:[-0.38,0.88,0.0],hipL:[0.17,0.48,-0.1],hipR:[0.22,0.48,0.1],kneeL:[-0.24,0.52,-0.13],kneeR:[-0.12,0.04,0.12],footL:[-0.24,0.04,-0.14],footR:[0.32,0.08,0.12],butt:[0.08,0.9,0.11],muzzle:[-0.84,0.95,0.04]},
+  prone:{head:[-0.12,0.3,0.06],chest:[0.14,0.17,0],pelvis:[0.62,0.12,0],sR:[0.12,0.2,0.18],sL:[0.08,0.2,-0.18],eR:[-0.02,0.04,0.34],hR:[-0.13,0.22,0.1],eL:[-0.24,0.04,-0.16],hL:[-0.4,0.25,0.0],hipL:[0.64,0.1,-0.1],hipR:[0.64,0.1,0.1],kneeL:[1.06,0.07,-0.26],footL:[1.48,0.05,-0.36],kneeR:[1.06,0.07,0.26],footR:[1.48,0.05,0.36],butt:[0.06,0.22,0.12],muzzle:[-0.86,0.3,0.04]}
+};
+const FIG_S=0.42;
+function poseLocal(name){
+  const P=POSES[name]||POSES.standing; let mn=1e9,mx=-1e9;
+  for(const k in P){ mn=Math.min(mn,P[k][0]); mx=Math.max(mx,P[k][0]); }
+  const cx=(mn+mx)/2, o={};
+  for(const k in P) o[k]=new THREE.Vector3((P[k][0]-cx)*FIG_S, P[k][1]*FIG_S-0.05, P[k][2]*FIG_S);
+  return o;
+}
+const BONES=[['chest','pelvis',0.05],['sL','sR',0.026],['sR','eR',0.02],['eR','hR',0.018],['sL','eL',0.02],['eL','hL',0.018],['hipL','hipR',0.032],['hipL','kneeL',0.026],['kneeL','footL',0.021],['hipR','kneeR',0.026],['kneeR','footR',0.021],['chest','head',0.018]];
+function buildFigure(){
+  const g=new THREE.Group(), Y=new THREE.Vector3(0,1,0), X=new THREE.Vector3(1,0,0);
+  const cloth=new THREE.MeshStandardMaterial({color:0x9c8a62, roughness:.85});
+  const helmet=new THREE.MeshStandardMaterial({color:0x6f6a4c, roughness:.7});
+  const gun=new THREE.MeshStandardMaterial({color:0x1b1e24, roughness:.6, metalness:.3});
+  const ground=new THREE.Mesh(new THREE.BoxGeometry(1.05,0.01,0.5), new THREE.MeshStandardMaterial({color:0x8d7c58, roughness:1})); ground.position.y=-0.056; g.add(ground);
+  const bones=BONES.map(([a,b,r])=>{ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,1,12),cloth); g.add(m); return {a,b,m}; });
+  const joints=['head','hR','hL','kneeL','kneeR','eL','eR','footL','footR'].map(k=>{ const r=k==='head'?0.045:k.indexOf('foot')===0?0.024:0.021; const m=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),k==='head'?helmet:cloth); g.add(m); return {k,m}; });
+  const rifle=new THREE.Mesh(new THREE.BoxGeometry(1,0.026,0.02),gun); g.add(rifle);
+  let cur=null, tgt=null; const d=new THREE.Vector3();
+  function apply(){
+    bones.forEach(({a,b,m})=>{ d.copy(cur[b]).sub(cur[a]); const L=d.length()||1e-4; m.position.copy(cur[a]).add(cur[b]).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(Y,d.normalize()); m.scale.set(1,L,1); });
+    joints.forEach(({k,m})=>m.position.copy(cur[k]));
+    d.copy(cur.muzzle).sub(cur.butt); const L=d.length(); rifle.position.copy(cur.butt).add(cur.muzzle).multiplyScalar(0.5); rifle.quaternion.setFromUnitVectors(X,d.normalize()); rifle.scale.set(L,1,1);
+  }
+  g.userData.setPose=(name,snap)=>{ tgt=poseLocal(name); if(snap||!cur){ cur={}; for(const k in tgt) cur[k]=tgt[k].clone(); } apply(); };
+  g.userData.tick=()=>{ if(!tgt) return; let mv=false; for(const k in tgt){ if(cur[k].distanceToSquared(tgt[k])>1e-9){ cur[k].lerp(tgt[k],0.07); mv=true; } } if(mv) apply(); };
+  return g;
+}
+/* Sight-picture board: correct / post high / post off-centre */
+function buildSight(){
+  const g=new THREE.Group();
+  const t=canvasTex(1800,900,(x,W,Hh)=>{
+    x.fillStyle='#f4f1ea'; x.fillRect(0,0,W,Hh);
+    const cases=[{lab:'صحيح',ok:true,dy:0,dx:0},{lab:'خطأ: الشعيرة مرتفعة',ok:false,dy:-80,dx:0},{lab:'خطأ: الشعيرة منحرفة',ok:false,dy:0,dx:85}];
+    cases.forEach((c,i)=>{
+      const cx=W-W*(i*2+1)/6, cy=380, R=200;
+      x.save(); x.fillStyle='#3a3f48'; x.fillRect(cx-280,cy-280,560,560);
+      x.beginPath(); x.arc(cx,cy,R,0,Math.PI*2); x.clip();
+      x.fillStyle='#e9e4d6'; x.fillRect(cx-R,cy-R,2*R,2*R);
+      const tipX=cx+c.dx, tipY=cy+c.dy;
+      x.fillStyle='#1b1e24'; x.fillRect(tipX-14,tipY,28,R*2);
+      x.beginPath(); x.moveTo(tipX-14,tipY); x.lineTo(tipX,tipY-14); x.lineTo(tipX+14,tipY); x.fill();
+      x.fillStyle='rgba(20,22,26,0.55)'; x.beginPath(); x.arc(cx,cy-46,34,0,Math.PI*2); x.fill();
+      x.restore();
+      x.lineWidth=46; x.strokeStyle='#1b1e24'; x.beginPath(); x.arc(cx,cy,R+18,0,Math.PI*2); x.stroke();
+      x.font='800 54px '+FONT; x.textAlign='center'; x.textBaseline='middle'; x.direction='rtl'; x.fillStyle=c.ok?'#1f8a5b':'#c0473a'; x.fillText(c.lab,cx,780);
+    });
+  });
+  const face=new THREE.Mesh(new THREE.PlaneGeometry(0.96,0.48), new THREE.MeshBasicMaterial({map:t})); face.position.set(0,0.22,0.006); g.add(face);
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.52,0.01), new THREE.MeshStandardMaterial({color:0x12234a, roughness:.7})); frame.position.set(0,0.22,0); g.add(frame);
+  const foot=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.02,0.2), new THREE.MeshStandardMaterial({color:0x12234a})); foot.position.set(0,-0.05,0); g.add(foot);
+  const leg=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.04,0.04), new THREE.MeshStandardMaterial({color:0xc9a24a})); leg.position.set(0,-0.03,0); g.add(leg);
+  return g;
+}
+function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): type==='rifle'?buildRifle(): type==='figure'?buildFigure(): type==='sight'?buildSight(): new THREE.Group(); }
 
 function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function labelTexture(text, hl){
@@ -483,8 +621,8 @@ function buildHotspots(slide){
   const list=[];
   (slide.hotspots||[]).forEach((h,i)=>{
     const p=hotspotPos(slide,h);
-    const grp=new THREE.Group(); grp.position.set(p[0],p[1],p[2]);
-    const up=0.075+(i%2)*0.075;
+    const grp=new THREE.Group(); grp.position.set(p[0],p[1],p[2]); const base=grp.position.clone(), part=hotspotPart(slide,h);
+    const up=0.075+(i%3)*0.065;
     const dot=new THREE.Mesh(new THREE.SphereGeometry(0.014,16,12), new THREE.MeshBasicMaterial({color:0xe8c978}));
     const hit=new THREE.Mesh(new THREE.SphereGeometry(0.045,10,8), new THREE.MeshBasicMaterial({visible:false}));
     hit.userData.hotspot=i;
@@ -494,7 +632,7 @@ function buildHotspots(slide){
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:n.t, depthTest:false, transparent:true}));
     const lh=0.055; sp.scale.set(lh*n.aspect, lh, 1); sp.position.y=up+lh/2; sp.renderOrder=30; sp.raycast=noRay;
     grp.add(dot,hit,line,sp);
-    list.push({grp, dot, hit, sp, tex:[n.t,hlt.t]});
+    list.push({grp, dot, hit, sp, tex:[n.t,hlt.t], base, part});
   });
   return list;
 }
@@ -574,7 +712,7 @@ const S = { lesson: lessonById(curId), i:0, hl:-1 };
 
 /* Helper that owns a model group + hotspots inside a parent */
 function makeRig(parent){
-  const rig = {root:new THREE.Group(), model:null, type:null, hs:[], hits:[], meshes:[], target:new THREE.Quaternion(), pointer:null};
+  const rig = {root:new THREE.Group(), model:null, type:null, hs:[], hits:[], meshes:[], target:new THREE.Quaternion(), pointer:null, exp:0, expCur:0};
   parent.add(rig.root);
   const pm=new THREE.Mesh(new THREE.SphereGeometry(0.02,16,12), new THREE.MeshBasicMaterial({color:0xe8c978, depthTest:false, transparent:true}));
   pm.renderOrder=40; pm.raycast=noRay;
@@ -582,16 +720,29 @@ function makeRig(parent){
   halo.renderOrder=40; halo.raycast=noRay; pm.add(halo); pm.visible=false; rig.pointer=pm; rig.halo=halo;
   rig.root.add(pm);
   rig.load = function(slide){
+    let fresh=false;
     if(slide.model!==rig.type){
       if(rig.model){ rig.root.remove(rig.model); disposeTree(rig.model); }
-      rig.model=buildModel(slide.model); rig.type=slide.model; rig.root.add(rig.model);
+      rig.model=buildModel(slide.model); rig.type=slide.model; rig.root.add(rig.model); fresh=true;
       rig.root.quaternion.identity(); rig.target.identity();
     }
+    rig.exp = slide.explode?1:0; if(fresh) rig.expCur=rig.exp;
+    if(rig.model.userData.setPose) rig.model.userData.setPose(slide.pose||'standing', fresh);
     rig.hs.forEach(h=>{ rig.root.remove(h.grp); h.grp.traverse(c=>{ if(c.geometry) c.geometry.dispose(); }); h.tex.forEach(t=>t.dispose()); h.sp.material.dispose(); });
     rig.hs = buildHotspots(slide); rig.hs.forEach(h=>rig.root.add(h.grp));
     rig.hits = rig.hs.map(h=>h.hit);
     rig.meshes=[]; rig.model.traverse(c=>{ if(c.isMesh) rig.meshes.push(c); });
     rig.setHL(-1);
+  };
+  rig.update = function(t){
+    const M=rig.model; if(!M) return;
+    if(M.userData.parts){
+      const dv=rig.exp-rig.expCur; rig.expCur = Math.abs(dv)<0.002 ? rig.exp : rig.expCur+dv*0.08;
+      const P=M.userData.parts; for(const k in P) P[k].obj.position.copy(P[k].off).multiplyScalar(rig.expCur);
+      rig.hs.forEach(h=>{ if(h.part && P[h.part]) h.grp.position.copy(h.base).add(P[h.part].obj.position); });
+    }
+    if(M.userData.tick) M.userData.tick();
+    if(M.userData.needle) M.userData.needle.rotation.y=Math.sin(t/900)*0.06;
   };
   rig.setHL = function(i){ rig.hs.forEach((h,k)=>{ const on=k===i; h.sp.material.map=h.tex[on?1:0]; h.sp.material.needsUpdate=true; h.dot.scale.setScalar(on?1.8:1); }); };
   return rig;
@@ -651,6 +802,7 @@ function startBoard(){
     (sl.hotspots||[]).forEach((h,k)=>{ const s=document.createElement('span'); s.textContent=h.label; if(k===S.hl) s.className='hl'; lg.appendChild(s); });
     $('#bPrev').disabled=S.i===0; $('#bNext').disabled=S.i===L.slides.length-1;
     $('#bHint').hidden = sl.model==='none';
+    $('#bExplode').hidden = sl.model!=='rifle'; $('#bExplode').textContent = rig.exp?'تركيب':'تفكيك';
   }
   function setSlide(i, remote){
     const n=S.lesson.slides.length; i=Math.max(0,Math.min(n-1,i|0));
@@ -667,6 +819,7 @@ function startBoard(){
   });
   $('#bPrev').addEventListener('click',()=>setSlide(S.i-1));
   $('#bNext').addEventListener('click',()=>setSlide(S.i+1));
+  $('#bExplode').addEventListener('click',()=>{ rig.exp=rig.exp?0:1; $('#bExplode').textContent=rig.exp?'تركيب':'تفكيك'; Link.send({t:'exp',v:rig.exp}); });
   $('#bReset').addEventListener('click',()=>{ rig.target.identity(); zoom=1; sizeIt(); Link.send({t:'rot',q:rig.target.toArray()}); });
   addEventListener('keydown',e=>{
     if(!$('#editor').hidden || /INPUT|TEXTAREA|SELECT/.test(document.activeElement&&document.activeElement.tagName)) return;
@@ -735,6 +888,7 @@ function startBoard(){
         '<button class="btn mini" data-a="up">أعلى</button><button class="btn mini" data-a="down">أسفل</button><button class="btn mini" data-a="del">حذف</button></div>'+
         '<div class="row2"><div class="field"><label for="st'+k+'">عنوان الخطوة</label><input id="st'+k+'"></div>'+
         '<div class="field"><label for="sm'+k+'">المجسّم</label><select id="sm'+k+'"></select></div></div>'+
+        '<div class="xopt"></div>'+
         '<div class="field"><label for="sp'+k+'">النقاط (كل نقطة في سطر)</label><textarea id="sp'+k+'"></textarea></div>'+
         '<div class="field"><label>نقاط الإشارة على المجسّم</label><div class="hsl" style="display:flex;flex-direction:column;gap:8px"></div>'+
         '<div><button class="btn mini" data-a="addhs">+ إضافة نقطة على المجسّم</button></div></div>';
@@ -742,6 +896,9 @@ function startBoard(){
       const t=c.querySelector('#st'+k); t.value=sl.title; t.addEventListener('input',()=>sl.title=t.value);
       const m=c.querySelector('#sm'+k); Object.keys(MODEL_NAMES).forEach(key=>{ const o=document.createElement('option'); o.value=key; o.textContent=MODEL_NAMES[key]; m.appendChild(o); }); m.value=sl.model;
       m.addEventListener('change',()=>{ sl.model=m.value; sl.hotspots=sl.hotspots.filter(h=>h.p); openEditor(true,k); });
+      const xo=c.querySelector('.xopt');
+      if(sl.model==='rifle'){ xo.innerHTML='<label style="display:flex;gap:8px;align-items:center;font-size:15px"><input type="checkbox" id="sx'+k+'"> عرض السلاح مفككًا في هذه الخطوة</label>'; const cb=xo.querySelector('input'); cb.checked=!!sl.explode; cb.addEventListener('change',()=>sl.explode=cb.checked); }
+      else if(sl.model==='figure'){ xo.className='field xopt'; xo.innerHTML='<label for="so'+k+'">الوضعية</label><select id="so'+k+'"></select>'; const ps=xo.querySelector('select'); Object.keys(POSE_NAMES).forEach(key=>{ const o=document.createElement('option'); o.value=key; o.textContent=POSE_NAMES[key]; ps.appendChild(o); }); ps.value=sl.pose||'standing'; ps.addEventListener('change',()=>sl.pose=ps.value); }
       const p=c.querySelector('#sp'+k); p.value=sl.points.join('\n'); p.addEventListener('input',()=>sl.points=p.value.split('\n'));
       const hl=c.querySelector('.hsl');
       sl.hotspots.forEach((h,j)=>{
@@ -808,6 +965,7 @@ function startBoard(){
     if(m.t==='hello'){ Link.send({t:'lesson', lesson:S.lesson, i:S.i}); Link.send({t:'rot', q:rig.target.toArray()}); }
     else if(m.t==='slide'){ setSlide(m.i,true); }
     else if(m.t==='rot' && Array.isArray(m.q) && !drag){ rig.target.fromArray(m.q); }
+    else if(m.t==='exp'){ rig.exp=m.v?1:0; $('#bExplode').textContent=rig.exp?'تركيب':'تفكيك'; }
     else if(m.t==='ptr'){
       if(Array.isArray(m.p)){ rig.pointer.position.fromArray(m.p); rig.pointer.visible=true; } else rig.pointer.visible=false;
       const h=typeof m.h==='number'?m.h:-1; if(h!==S.hl){ S.hl=h; rig.setHL(h); renderSide(); }
@@ -824,7 +982,7 @@ function startBoard(){
     const t=performance.now();
     rig.root.quaternion.slerp(rig.target, 0.3);
     if(rig.pointer.visible){ const s=1+0.35*Math.sin(t/180); rig.halo.scale.setScalar(s); rig.halo.quaternion.copy(camera.quaternion); rig.halo.quaternion.premultiply(rig.root.quaternion.clone().invert()); }
-    if(rig.model && rig.model.userData.needle) rig.model.userData.needle.rotation.y=Math.sin(t/900)*0.06;
+    rig.update(t);
     renderer.render(scene,camera);
   });
 }
@@ -855,7 +1013,9 @@ function startHeadset(){
   const ped=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.48,0.95,48), new THREE.MeshStandardMaterial({color:0x12234a, roughness:.7})); ped.position.set(0,0.475,-0.75); env.add(ped);
   scene.add(env);
 
-  const stage=new THREE.Group(); stage.position.set(0,1.0,-0.75); stage.scale.setScalar(0.6); scene.add(stage);
+  const STAGE0=new THREE.Vector3(0,1.0,-0.75); let zf=1;
+  const stage=new THREE.Group(); stage.position.copy(STAGE0); stage.scale.setScalar(0.6); scene.add(stage);
+  const baseScale=()=>((VIEW[rig.type]&&VIEW[rig.type].xr)||0.6)*zf;
   const rig=makeRig(stage);
   const ringUnder=new THREE.Mesh(new THREE.RingGeometry(0.55,0.57,64), new THREE.MeshBasicMaterial({color:0xc9a24a, side:THREE.DoubleSide, transparent:true, opacity:.7}));
   ringUnder.rotation.x=-Math.PI/2; ringUnder.position.y=-0.055; ringUnder.raycast=noRay; stage.add(ringUnder);
@@ -887,19 +1047,19 @@ function startHeadset(){
     const alive=Link.alive();
     x.fillStyle=alive?PAL.ok:PAL.mute; x.beginPath(); x.arc(W-52, Hh-140, 8, 0, Math.PI*2); x.fill();
     txt(alive?('متصل بشاشة العرض · '+(Link.code||'')):(Link.code?'غير متصل بشاشة العرض':'شرح بدون ربط'), W-70, Hh-140, 22, alive?PAL.ok:PAL.mute, 500);
-    txt('A التالي · B السابق · اضغط الزناد على المجسّم وأدِر معصمك', 44, Hh-140, 20, PAL.mute, 500, 'left');
-    const by=Hh-112, bh=82, m=40, g=18, ew=170, bw=(W-m*2-g*2-ew)/2;
-    buttons=[
-      {id:'prev', label:'السابق', x:W-m-bw, y:by, w:bw, h:bh, on:S.i>0},
-      {id:'next', label:'التالي', x:W-m-bw*2-g, y:by, w:bw, h:bh, on:S.i<L.slides.length-1, primary:true},
-      {id:'exit', label:'خروج', x:m, y:by, w:ew, h:bh, on:true}
-    ];
+    txt('الزناد: تدوير · القبضة: تحريك · العصا: تكبير · A/B: الخطوات', 44, Hh-140, 20, PAL.mute, 500, 'left');
+    const by=Hh-112, bh=82, m=40, g=16;
+    const defs=[{id:'prev',label:'السابق',on:S.i>0,w:1},{id:'next',label:'التالي',on:S.i<L.slides.length-1,primary:true,w:1}];
+    if(rig.type==='rifle') defs.push({id:'exp',label:rig.exp?'تركيب':'تفكيك',on:true,w:0.85});
+    defs.push({id:'reset',label:'إعادة',on:true,w:0.75},{id:'exit',label:'خروج',on:true,w:0.75});
+    const unit=(W-m*2-g*(defs.length-1))/defs.reduce((a,b)=>a+b.w,0); let bx=W-m;
+    buttons=defs.map(d=>{ const w=d.w*unit; bx-=w; const b=Object.assign({},d,{x:bx,y:by,w,h:bh}); bx-=g; return b; });
     buttons.forEach(b=>{
       const hov=hoverBtn===b.id && b.on;
       rr(x,b.x,b.y,b.w,b.h,20);
       x.fillStyle = b.primary ? (hov?PAL.gold2:PAL.gold) : (hov?PAL.navy3:PAL.navy2); x.globalAlpha=b.on?1:.35; x.fill();
       x.lineWidth=3; x.strokeStyle=b.primary?PAL.gold2:PAL.gold; x.stroke();
-      txt(b.label, b.x+b.w/2, b.y+b.h/2+2, 34, b.primary?PAL.navy:PAL.gold2, 800, 'center'); x.globalAlpha=1;
+      txt(b.label, b.x+b.w/2, b.y+b.h/2+2, 30, b.primary?PAL.navy:PAL.gold2, 800, 'center'); x.globalAlpha=1;
     });
     ptex.needsUpdate=true;
   }
@@ -914,13 +1074,15 @@ function startHeadset(){
   function setSlide(i, remote){
     const n=S.lesson.slides.length; i=Math.max(0,Math.min(n-1,i|0));
     const changed=i!==S.i||!rig.model;
-    S.i=i; S.hl=-1; rig.load(S.lesson.slides[i]); rig.root.quaternion.copy(rig.target); stage.scale.setScalar((VIEW[rig.type]&&VIEW[rig.type].xr)||0.6);
+    S.i=i; S.hl=-1; rig.load(S.lesson.slides[i]); rig.root.quaternion.copy(rig.target); stage.scale.setScalar(baseScale());
     drawPanel();
     if(!remote){ Link.send({t:'slide',i}); if(changed) Link.send({t:'rot',q:rig.root.quaternion.toArray()}); }
   }
   function action(id){
     beep(880,.05);
     if(id==='prev') setSlide(S.i-1); else if(id==='next') setSlide(S.i+1); else if(id==='exit') exitAll();
+    else if(id==='exp'){ rig.exp=rig.exp?0:1; Link.send({t:'exp',v:rig.exp}); drawPanel(); }
+    else if(id==='reset'){ zf=1; stage.position.copy(STAGE0); stage.scale.setScalar(baseScale()); rig.root.quaternion.identity(); rig.target.identity(); Link.send({t:'rot',q:[0,0,0,1]}); }
   }
 
   // ---- audio + haptics
@@ -932,7 +1094,7 @@ function startHeadset(){
   // ---- pointing / dragging
   const ray=new THREE.Raycaster(), m4=new THREE.Matrix4();
   const tmpQ=new THREE.Quaternion(), tmpV=new THREE.Vector3();
-  let drag=null, lastRot=0, lastPtr=0, lastPtrSent='x';
+  let drag=null, grab=null, lastRot=0, lastPtr=0, lastPtrSent='x'; const gv=new THREE.Vector3();
   function hitTest(){
     const objs=[panel].concat(rig.hits, rig.meshes);
     return ray.intersectObjects(objs,false)[0];
@@ -974,6 +1136,8 @@ function startHeadset(){
     c.addEventListener('connected',e=>{ c.userData.src=e.data; });
     c.addEventListener('disconnected',()=>{ c.userData.src=null; dot.visible=false; });
     c.addEventListener('selectstart',()=>{ setRay(c); press(c.userData.src,c); });
+    c.addEventListener('squeezestart',()=>{ const p=new THREE.Vector3(); c.getWorldPosition(p); grab={c, p0:p, s0:stage.position.clone()}; pulse(c.userData.src,.3,30); });
+    c.addEventListener('squeezeend',()=>{ if(grab&&grab.c===c) grab=null; });
     c.addEventListener('selectend',()=>{ if(drag&&drag.ctrl===c){ drag=null; Link.send({t:'rot',q:rig.root.quaternion.toArray()}); } });
     scene.add(c); ctrls.push(c);
   }
@@ -991,9 +1155,12 @@ function startHeadset(){
         if(a&&!u.btn[0]) action('next'); if(b&&!u.btn[1]) action('prev'); u.btn=[a,b];
         const axv=gp.axes&&gp.axes.length>2?gp.axes[2]:0;
         if(u.ax===0 && Math.abs(axv)>0.75){ u.ax=Math.sign(axv); action(axv>0?'next':'prev'); } else if(Math.abs(axv)<0.3) u.ax=0;
+        const ayv=gp.axes&&gp.axes.length>3?gp.axes[3]:0;
+        if(Math.abs(ayv)>0.25 && Math.abs(axv)<0.5){ zf=Math.max(0.4,Math.min(3,zf*(1-ayv*0.02))); stage.scale.setScalar(baseScale()); }
       }
     });
     if(bestC){ setRay(bestC); } handleHover(best);
+    if(grab){ grab.c.getWorldPosition(gv); stage.position.copy(grab.s0).add(gv.sub(grab.p0)); }
     if(drag){
       drag.ctrl.getWorldQuaternion(tmpQ);
       const d=tmpQ.clone().multiply(drag.q0.clone().invert());
@@ -1023,6 +1190,7 @@ function startHeadset(){
     mray(e); handleHover(hitTest());
     cvs.style.cursor = hoverBtn ? 'pointer' : 'crosshair';
   });
+  cvs.addEventListener('wheel',e=>{ if(mode!=='desk') return; e.preventDefault(); zf=Math.max(0.4,Math.min(3,zf*(e.deltaY>0?0.93:1.07))); stage.scale.setScalar(baseScale()); },{passive:false});
   const mEnd=()=>{ if(mdrag){ mdrag=null; Link.send({t:'rot',q:rig.root.quaternion.toArray()}); } };
   cvs.addEventListener('pointerup',mEnd); cvs.addEventListener('pointercancel',mEnd);
 
@@ -1031,6 +1199,7 @@ function startHeadset(){
     if(m.t==='lesson' && validLesson(m.lesson)){ S.lesson=normalizeLesson(m.lesson); rig.type=null; setSlide(typeof m.i==='number'?m.i:S.i,true); }
     else if(m.t==='slide'){ setSlide(m.i,true); }
     else if(m.t==='rot' && Array.isArray(m.q) && !drag && !mdrag){ rig.target.fromArray(m.q); rig.root.quaternion.copy(rig.target); }
+    else if(m.t==='exp'){ rig.exp=m.v?1:0; drawPanel(); }
   };
   Link.onNet=(s)=>{
     const msg={connecting:'جارٍ البحث عن شاشة العرض…', linked:'تم الربط بشاشة العرض.', notfound:'لم أجد شاشة عرض بهذا الرمز. تأكد من الرمز وأن صفحة «شاشة العرض» مفتوحة.', local:'خادم الربط غير متاح من هذه الشبكة. يمكنك الشرح بدون ربط، أو بث شاشة النظارة إلى الكمبيوتر من تطبيق Meta Horizon.'}[s];
@@ -1076,7 +1245,7 @@ function startHeadset(){
   renderer.setAnimationLoop(()=>{
     const t=performance.now();
     if(mode==='xr') updateControllers();
-    if(rig.model && rig.model.userData.needle) rig.model.userData.needle.rotation.y=Math.sin(t/900)*0.06;
+    rig.update(t);
     if(mode!=='idle') renderer.render(scene,camera);
   });
 
