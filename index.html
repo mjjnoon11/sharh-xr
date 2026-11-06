@@ -457,14 +457,35 @@ AIDL.slides.push(
   {title:'أين يوضع الرباط الضاغط؟', model:'aid', pose:'pressure', points:[], hotspots:[], quiz:{kind:'choice', options:['على الجرح مباشرة','من 5 إلى 7 سم فوق الجرح','تحت الجرح','على المفصل'], answer:1}},
   {title:'مصاب يتنفس لكنه فاقد الوعي، تضعه في:', model:'aid', pose:'assess', points:[], hotspots:[], quiz:{kind:'choice', options:['وضعية الجلوس','على بطنه','وضعية الإفاقة'], answer:2}}
 );
-const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}, {id:'marks', lesson:MARKS}, {id:'aid', lesson:AIDL}, {id:'forms', lesson:FORMS}, {id:'nav', lesson:NAV}];
-const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', rifle:'سلاح تدريبي (قابل للتفكيك)', figure:'وضعية الرامي', sight:'صورة التصويب', aid:'مُسعف ومصاب', squad:'مجموعة أفراد (تشكيلات)', shadow:'ظل العصا والشمس', nightsky:'سماء الليل', none:'بدون مجسّم'};
+const ENG = {
+  title:'اللغة الإنجليزية: كلمات واتجاهات',
+  slides:[
+    {title:'رتّب الجملة', model:'sentence', points:['انقر الكلمات بالترتيب الصحيح لتكوّن الجملة','انقر كلمة في السطر لإرجاعها','تسمع نطق كل كلمة عند النقر عليها'],
+     data:{words:['I','am','a','soldier'], ar:'أنا جندي'}},
+    {title:'رتّب الجملة', model:'sentence', points:['انتبه لترتيب الكلمات في الجملة الإنجليزية','الصفة تأتي قبل الاسم'],
+     data:{words:['The','big','truck','is','behind','the','tent'], ar:'الشاحنة الكبيرة خلف الخيمة'}},
+    {title:'رتّب الجملة', model:'sentence', points:['جملة أمر لتوجيه الطريق','الفعل يأتي أولًا في جمل الأمر'],
+     data:{words:['Turn','left','at','the','next','corner'], ar:'انعطف يسارًا عند الزاوية التالية'}},
+    {title:'ضع الكلمة في مكانها', model:'label', points:['اختر بطاقة كلمة من الأسفل','ثم انقر الشيء الذي تدل عليه في المعسكر','أكمل الكلمات الست'], data:{}},
+    {title:'اختر الطريق الصحيح', model:'paths', points:['اقرأ الكلمة العربية في اللوحة','اختر الطريق الذي يحمل معناها بالإنجليزية','الجندي يمشي في الطريق الذي تختاره'],
+     data:{rounds:[{ar:'سيارة',opts:['Cat','Car','Card'],a:1},{ar:'ماء',opts:['Water','Winter','Waiter'],a:0},{ar:'يسار',opts:['Light','Right','Left'],a:2},{ar:'مستشفى',opts:['Hostel','Hospital','Hotel'],a:1},{ar:'جسر',opts:['Bridge','Bride','Brick'],a:0}]}},
+    {title:'اتجاهات الطريق', model:'town', points:['اقرأ الهدف المكتوب بالإنجليزية','قُد الجندي بالأزرار: Turn left و Go straight و Turn right','تسمع نطق كل أمر عند تنفيذه'],
+     data:{rounds:[{target:'Hospital', en:'Go to the hospital.', ar:'اذهب إلى المستشفى'},{target:'Police', en:'Go to the police station.', ar:'اذهب إلى مركز الشرطة'},{target:'School', en:'Find the school.', ar:'ابحث عن المدرسة'}]}},
+    {title:'اتبع التعليمات', model:'town', points:['اقرأ التعليمات الإنجليزية ونفّذها بالترتيب','إذا فهمتها صحيحًا ستصل إلى المكان المقصود'],
+     data:{rounds:[{target:'Bank', at:[2,1], en:'Go straight. Go straight. Turn right. Go straight. The bank is on your left.', ar:'اتبع التعليمات للوصول إلى البنك'},{target:'Hotel', at:[3,2], en:'Turn right. Go straight. Turn left. Go straight. The hotel is on your left.', ar:'اتبع التعليمات للوصول إلى الفندق'}]}},
+    {title:'ما معنى كلمة Behind؟', model:'label', points:[], hotspots:[], data:{}, quiz:{kind:'choice', options:['أمام','خلف','بجانب'], answer:1}},
+    {title:'Turn right تعني:', model:'town', points:[], hotspots:[], data:{rounds:[]}, quiz:{kind:'choice', options:['انعطف يمينًا','انعطف يسارًا','امشِ للأمام'], answer:0}}
+  ]
+};
+const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}, {id:'marks', lesson:MARKS}, {id:'aid', lesson:AIDL}, {id:'forms', lesson:FORMS}, {id:'nav', lesson:NAV}, {id:'eng', lesson:ENG}];
+const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', rifle:'سلاح تدريبي (قابل للتفكيك)', figure:'وضعية الرامي', sight:'صورة التصويب', aid:'مُسعف ومصاب', squad:'مجموعة أفراد (تشكيلات)', sentence:'نشاط: ترتيب الجملة', label:'نشاط: ضع الكلمة في مكانها', paths:'نشاط: اختر الطريق', town:'نشاط: اتجاهات الطريق', shadow:'ظل العصا والشمس', nightsky:'سماء الليل', none:'بدون مجسّم'};
 const FORM_NAMES = {file:'الرتل الفردي', column:'الرتل المزدوج', line:'الخط', wedge:'الإسفين'};
 const SHADOW_NAMES = {sun:'حركة الشمس والظل', marks:'العلامتان', north:'تحديد الشمال'};
 const SKY_NAMES = {dipper:'الدب الأكبر', pointer:'نجما الدليل', rotate:'دوران السماء', plain:'بدون إرشادات (للأسئلة)'};
 const AID_NAMES = {assess:'تقييم المصاب', pressure:'ضغط مباشر على الجرح', tourniquet:'الرباط الضاغط', recovery:'وضعية الإفاقة', cpr:'الإنعاش القلبي (مستمر)', cpr30:'الإنعاش 30:2 مع العدّاد', evac:'طلب الإسعاف'};
 const POSE_NAMES = {standing:'الوقوف', kneeling:'الجثو', prone:'الانبطاح'};
-const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}, rifle:{y:0.04,h:0.45,d:1.2,xr:0.75}, figure:{y:0.26,h:0.32,d:1.6,xr:0.7}, sight:{y:0.28,h:0.12,d:1.22,xr:0.8}, aid:{y:0.14,h:0.5,d:1.35,xr:0.75}, squad:{y:0.0,h:0.85,d:1.15,xr:0.8}, shadow:{y:-0.02,h:1.15,d:1.12,xr:0.8}, nightsky:{y:0.22,h:0.12,d:1.25,xr:0.65}};
+const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}, rifle:{y:0.04,h:0.45,d:1.2,xr:0.75}, figure:{y:0.26,h:0.32,d:1.6,xr:0.7}, sight:{y:0.28,h:0.12,d:1.22,xr:0.8}, aid:{y:0.14,h:0.5,d:1.35,xr:0.75}, squad:{y:0.0,h:0.85,d:1.15,xr:0.8}, shadow:{y:-0.02,h:1.15,d:1.12,xr:0.8}, nightsky:{y:0.22,h:0.12,d:1.25,xr:0.65}, sentence:{y:0.25,h:0.25,d:1.1,xr:0.8}, label:{y:0.04,h:0.6,d:1.15,xr:0.85}, paths:{y:0.03,h:0.75,d:1.2,xr:0.8}, town:{y:0.06,h:0.8,d:1.12,xr:0.8}};
+const ACT_MODELS={sentence:1,label:1,paths:1,town:1};
 function sceneNames(model){ return {figure:POSE_NAMES, aid:AID_NAMES, squad:FORM_NAMES, shadow:SHADOW_NAMES, nightsky:SKY_NAMES}[model]||null; }
 
 function validLesson(L){
@@ -481,7 +502,7 @@ function normalizeLesson(L){
   const out = {title: String(L.title||'درس بدون عنوان'), slides:[]};
   L.slides.forEach(s=>{
     out.slides.push({
-      title:String(s.title||''), model: MODEL_NAMES[s.model]?s.model:'none', explode:!!s.explode, pose: (POSE_NAMES[s.pose]||AID_NAMES[s.pose]||FORM_NAMES[s.pose]||SHADOW_NAMES[s.pose]||SKY_NAMES[s.pose])?s.pose:'standing', quiz: normQuiz(s.quiz),
+      title:String(s.title||''), model: MODEL_NAMES[s.model]?s.model:'none', explode:!!s.explode, data:(s.data&&typeof s.data==='object')?JSON.parse(JSON.stringify(s.data)):null, pose: (POSE_NAMES[s.pose]||AID_NAMES[s.pose]||FORM_NAMES[s.pose]||SHADOW_NAMES[s.pose]||SKY_NAMES[s.pose])?s.pose:'standing', quiz: normQuiz(s.quiz),
       points:(s.points||[]).map(String).filter(x=>x.trim()),
       hotspots:(Array.isArray(s.hotspots)?s.hotspots:[]).filter(h=>h&&(h.a||Array.isArray(h.p))).map(h=>h.a?{label:String(h.label||''),a:String(h.a)}:{label:String(h.label||''),p:h.p.slice(0,3).map(Number)})
     });
@@ -920,7 +941,237 @@ function buildNight(){
   g.userData.tick=(t)=>{ const th = mode==='rotate' ? TH0+(t/1000)*0.35 : TH0; if(th!==lastTh){ place(th); lastTh=th; } halo.scale.setScalar(1+0.25*Math.sin(t/300)); };
   return g;
 }
-function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): type==='rifle'?buildRifle(): type==='figure'?buildFigure(): type==='sight'?buildSight(): type==='aid'?buildAid(): type==='squad'?buildSquad(): type==='shadow'?buildShadow(): type==='nightsky'?buildNight(): new THREE.Group(); }
+/* =================== ACTIVITY KIT =================== */
+function seeded(str){ let h=1779033703; for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),3432918353); h=h<<13|h>>>19; } return function(){ h=Math.imul(h^h>>>16,2246822507); h=Math.imul(h^h>>>13,3266489909); h^=h>>>16; return (h>>>0)/4294967296; }; }
+function shuffled(arr,seed){ const r=seeded(seed), a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const TILE_SIDE=new THREE.MeshStandardMaterial({color:0x1a3163, roughness:.6});
+function makeTile(text,h,opt){
+  opt=opt||{}; const cv=document.createElement('canvas'), x=cv.getContext('2d'), fs=78;
+  x.font='800 '+fs+'px '+FONT; const tw=x.measureText(text).width; cv.width=Math.ceil(tw+70); cv.height=124;
+  x.font='800 '+fs+'px '+FONT; rr(x,4,4,cv.width-8,cv.height-8,22); x.fillStyle=opt.bg||'#f4f1ea'; x.fill(); x.lineWidth=7; x.strokeStyle=opt.border||'#c9a24a'; x.stroke();
+  x.fillStyle=opt.fg||'#0a1630'; x.textAlign='center'; x.textBaseline='middle'; x.direction=opt.rtl?'rtl':'ltr'; x.fillText(text,cv.width/2,cv.height/2+4);
+  const t=new THREE.CanvasTexture(cv); t.anisotropy=8; const w=h*cv.width/cv.height;
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,0.016),[TILE_SIDE,TILE_SIDE,TILE_SIDE,TILE_SIDE,new THREE.MeshStandardMaterial({map:t, roughness:.5}),TILE_SIDE]);
+  m.userData.w=w; return m;
+}
+function tint(m,hex){ if(m && m.material && m.material[4]) m.material[4].color.setHex(hex); }
+function disposeMesh(m){ if(!m) return; if(m.parent) m.parent.remove(m); m.traverse(c=>{ if(c.geometry) c.geometry.dispose(); const ms=Array.isArray(c.material)?c.material:(c.material?[c.material]:[]); ms.forEach(mt=>{ if(mt===TILE_SIDE) return; if(mt.map) mt.map.dispose(); mt.dispose(); }); }); }
+function makeBoard(w,h,draw){
+  const cv=document.createElement('canvas'); cv.width=Math.round(w*1100); cv.height=Math.round(h*1100); const x=cv.getContext('2d');
+  const t=new THREE.CanvasTexture(cv); t.anisotropy=8;
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({map:t, transparent:true})); m.raycast=noRay;
+  m.userData.redraw=(...args)=>{ x.clearRect(0,0,cv.width,cv.height); rr(x,4,4,cv.width-8,cv.height-8,26); x.fillStyle='rgba(10,22,48,0.95)'; x.fill(); x.lineWidth=6; x.strokeStyle='#c9a24a'; x.stroke(); draw(x,cv.width,cv.height,...args); t.needsUpdate=true; };
+  return m;
+}
+function ctext(x,s,cx,cy,fs,col,w,rtl){ x.font=(w||800)+' '+fs+'px '+FONT; x.fillStyle=col; x.textAlign='center'; x.textBaseline='middle'; x.direction=rtl?'rtl':'ltr'; x.fillText(s,cx,cy); }
+function fitText(x,s,maxW,fs,w){ x.font=(w||800)+' '+fs+'px '+FONT; while(x.measureText(s).width>maxW && fs>18){ fs-=2; x.font=(w||800)+' '+fs+'px '+FONT; } return fs; }
+function makeMan(color){
+  const m=new THREE.Group(), cloth=new THREE.MeshStandardMaterial({color:color||0x8a7f58, roughness:.85});
+  const torso=new THREE.Mesh(new THREE.CylinderGeometry(0.019,0.023,0.08,10),cloth); torso.position.y=0.1; m.add(torso);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.02,14,10), new THREE.MeshStandardMaterial({color:0xc9a24a, metalness:.3, roughness:.4})); head.position.y=0.162; m.add(head);
+  const legs=[-1,1].map(sd=>{ const pv=new THREE.Group(); pv.position.set(sd*0.011,0.062,0); const l=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.062,8),cloth); l.position.y=-0.031; pv.add(l); m.add(pv); return pv; });
+  const nose=new THREE.Mesh(new THREE.ConeGeometry(0.012,0.03,8), new THREE.MeshBasicMaterial({color:0xe8c978})); nose.rotation.x=-Math.PI/2; nose.position.set(0,0.1,-0.035); m.add(nose);
+  m.traverse(c=>{ c.raycast=noRay; }); m.userData.legs=legs; m.userData.cloth=cloth; return m;
+}
+function walkAnim(man,t,moving){ const ph=moving?Math.sin(t*0.018):0; man.userData.legs[0].rotation.x=ph*0.6; man.userData.legs[1].rotation.x=-ph*0.6; }
+function speakable(g){ g.userData.emit=g.userData.emit||(()=>{}); }
+
+/* ---- 1. sentence builder ---- */
+function buildSentence(){
+  const g=new THREE.Group(); speakable(g);
+  const back=new THREE.Mesh(new THREE.BoxGeometry(1.02,0.66,0.02), new THREE.MeshStandardMaterial({color:0x12234a, roughness:.7})); back.position.set(0,0.27,-0.03); g.add(back);
+  const foot=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.02,0.2), new THREE.MeshStandardMaterial({color:0x12234a})); foot.position.set(0,-0.05,0); g.add(foot);
+  const prompt=makeBoard(0.94,0.13,(x,W,Hh,ar)=>{ ctext(x,ar||'',W/2,Hh*0.42,fitText(x,ar||'',W-60,64),'#e8c978',800,true); ctext(x,'Build the sentence',W/2,Hh*0.8,30,'#96a6c2',600); }); prompt.position.set(0,0.52,-0.015); g.add(prompt);
+  const slotM=new THREE.MeshBasicMaterial({color:0x2a3f6c});
+  let tiles=[], slots=[], words=[], state='play', until=0;
+  g.userData.setData=(slide)=>{
+    tiles.forEach(t=>disposeMesh(t.m)); slots.forEach(sl=>disposeMesh(sl.m)); tiles=[]; slots=[]; state='play';
+    const d=(slide&&slide.data)||{}; words=(d.words||['Hello','world']).map(String);
+    prompt.userData.redraw(d.ar||'');
+    const H=0.07, gap=0.018, made=words.map(w=>makeTile(w,H));
+    let total=made.reduce((a,m)=>a+m.userData.w,0)+gap*(made.length-1), sc=Math.min(1,0.94/total);
+    let sx=-total*sc/2;
+    made.forEach((m,i)=>{ m.scale.setScalar(sc); const w=m.userData.w*sc; const sp=new THREE.Mesh(new THREE.PlaneGeometry(w,H*sc), slotM); sp.position.set(sx+w/2,0.36,-0.018); sp.raycast=noRay; g.add(sp); slots.push({m:sp, pos:new THREE.Vector3(sx+w/2,0.36,0), w, tile:null}); sx+=w+gap*sc; });
+    let order=shuffled(made.map((m,i)=>i), words.join(' ')); if(order.every((v,i)=>v===i) && order.length>1) order=order.slice(1).concat(order[0]);
+    let row=0, rx=0, rows=[[]];
+    order.forEach(i=>{ const w=made[i].userData.w*sc; if(rx+w>0.94 && rows[row].length){ row++; rows.push([]); rx=0; } rows[row].push(i); rx+=w+gap*sc; });
+    rows.forEach((r,ri)=>{ const tw=r.reduce((a,i)=>a+made[i].userData.w*sc,0)+gap*sc*(r.length-1); let px=-tw/2; r.forEach(i=>{ const w=made[i].userData.w*sc; const home=new THREE.Vector3(px+w/2,0.17-ri*0.1,0); px+=w+gap*sc; const m=made[i]; m.position.copy(home); m.userData.act='w'+i; g.add(m); tiles[i]={m, word:words[i], home, slot:-1}; }); });
+    g.userData.status='0 من '+words.length;
+  };
+  function placed(){ return slots.map(s=>s.tile==null?null:tiles[s.tile].word); }
+  g.userData.click=(id)=>{
+    if(state!=='play' || id[0]!=='w') return; const i=+id.slice(1), t=tiles[i]; if(!t) return;
+    g.userData.emit('say',t.word);
+    if(t.slot>=0){ slots[t.slot].tile=null; t.slot=-1; }
+    else { const k=slots.findIndex(s=>s.tile==null); if(k<0) return; slots[k].tile=i; t.slot=k; g.userData.emit('tap'); }
+    const n=slots.filter(s=>s.tile!=null).length; g.userData.status=n+' من '+words.length;
+    if(n===words.length){
+      const ok=placed().join(' ')===words.join(' ');
+      if(ok){ state='done'; tiles.forEach(t=>tint(t.m,0xa8f0c0)); g.userData.status='✓ ممتاز'; g.userData.emit('ok'); setTimeout(()=>g.userData.emit('say',words.join(' ')),500); }
+      else { state='wrong'; until=performance.now()+1300; tiles.forEach(t=>tint(t.m,0xffb3b3)); g.userData.status='✗ حاول مرة أخرى'; g.userData.emit('bad'); }
+    }
+  };
+  g.userData.tick=(t)=>{
+    if(state==='wrong' && t>until){ state='play'; tiles.forEach(tl=>{ tl.slot=-1; tint(tl.m,0xffffff); }); slots.forEach(s=>s.tile=null); g.userData.status='0 من '+words.length; }
+    tiles.forEach(tl=>{ const target=tl.slot>=0?slots[tl.slot].pos:tl.home; tl.m.position.lerp(target,0.2); });
+  };
+  return g;
+}
+
+/* ---- 2. label the camp ---- */
+const CAMP=[{k:'tent',en:'Tent',p:[-0.33,-0.2]},{k:'tower',en:'Tower',p:[0.0,-0.24]},{k:'flag',en:'Flag',p:[0.33,-0.2]},{k:'truck',en:'Truck',p:[-0.22,0.05]},{k:'gate',en:'Gate',p:[0.1,0.06]},{k:'tree',en:'Tree',p:[0.36,0.06]}];
+function buildLabel(){
+  const g=new THREE.Group(); speakable(g);
+  const gm=new THREE.MeshStandardMaterial({color:0xb9a57b, roughness:1});
+  const ground=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.03,0.9), gm); ground.position.set(0,-0.055,0.03); g.add(ground);
+  const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c, roughness:.75},o||{}));
+  const objs={}, tops={};
+  const add=(k,grp,top)=>{ const it=CAMP.find(c=>c.k===k); grp.position.set(it.p[0],-0.04,it.p[1]); grp.traverse(c=>{ if(c.isMesh) c.userData.act='o:'+k; }); g.add(grp); objs[k]=grp; tops[k]=new THREE.Vector3(it.p[0],top,it.p[1]); };
+  let o=new THREE.Group(); const tent=new THREE.Mesh(new THREE.ConeGeometry(0.11,0.12,4),M(0x6f7d52)); tent.rotation.y=Math.PI/4; tent.position.y=0.06; o.add(tent); const door=new THREE.Mesh(new THREE.PlaneGeometry(0.04,0.06),M(0x2b2f22)); door.position.set(0,0.03,0.079); door.rotation.x=-0.55; o.add(door); add('tent',o,0.2);
+  o=new THREE.Group(); [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>{ const l=new THREE.Mesh(new THREE.BoxGeometry(0.012,0.24,0.012),M(0x5a4632)); l.position.set(a*0.04,0.12,b*0.04); o.add(l); }); const pl=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.012,0.12),M(0x6b5136)); pl.position.y=0.24; o.add(pl); const rf=new THREE.Mesh(new THREE.ConeGeometry(0.09,0.06,4),M(0x8a5a3c)); rf.rotation.y=Math.PI/4; rf.position.y=0.28; o.add(rf); add('tower',o,0.36);
+  o=new THREE.Group(); const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.005,0.005,0.28,8),M(0xb9c0cc,{metalness:.7})); pole.position.y=0.14; o.add(pole); const fg=new THREE.PlaneGeometry(0.12,0.07,8,1); const flag=new THREE.Mesh(fg,M(0xc9a24a,{side:THREE.DoubleSide})); flag.position.set(0.062,0.24,0); o.add(flag); add('flag',o,0.33);
+  o=new THREE.Group(); const cab=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,0.07),M(0x56653a)); cab.position.set(-0.07,0.05,0); o.add(cab); const box=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.075,0.075),M(0x4b5733)); box.position.set(0.03,0.058,0); o.add(box); [[-0.07,1],[-0.07,-1],[0.06,1],[0.06,-1]].forEach(([x0,zs])=>{ const w=new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,0.012,14),M(0x17191d)); w.rotation.x=Math.PI/2; w.position.set(x0,0.018,zs*0.04); o.add(w); }); add('truck',o,0.16);
+  o=new THREE.Group(); [-1,1].forEach(sd=>{ const pp=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.12,0.02),M(0x8f96a3)); pp.position.set(sd*0.09,0.06,0); o.add(pp); }); const bt=canvasTex(256,32,(x,W,Hh)=>{ for(let i=0;i<8;i++){ x.fillStyle=i%2?'#f4f1ea':'#c0392b'; x.fillRect(i*W/8,0,W/8,Hh); } }); const bar=new THREE.Mesh(new THREE.BoxGeometry(0.17,0.014,0.012),new THREE.MeshStandardMaterial({map:bt})); bar.position.y=0.09; o.add(bar); add('gate',o,0.2);
+  o=new THREE.Group(); const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.016,0.1,8),M(0x6b4a2b)); tr.position.y=0.05; o.add(tr); const lf=new THREE.Mesh(new THREE.SphereGeometry(0.06,16,12),M(0x4f7a3a)); lf.position.y=0.13; o.add(lf); add('tree',o,0.25);
+  const cards={}; let sel=null, done={}, flashUntil=0, flashKey=null;
+  const order=shuffled(CAMP.map(c=>c.k),'camp');
+  order.forEach((k,i)=>{ const it=CAMP.find(c=>c.k===k); const m=makeTile(it.en,0.06); const home=new THREE.Vector3(-0.375+i*0.15,0.0,0.4); m.position.copy(home); m.rotation.x=-0.7; m.userData.act='c:'+k; g.add(m); cards[k]={m,home,target:home.clone(),rx:-0.7}; });
+  function refresh(){ CAMP.forEach(c=>{ const cd=cards[c.k]; tint(cd.m, done[c.k]?0xa8f0c0 : sel===c.k?0xffe08a : (flashKey===c.k?0xffb3b3:0xffffff)); }); g.userData.status = Object.keys(done).length===CAMP.length ? '✓ أحسنت! أكملت الكلمات' : Object.keys(done).length+' من '+CAMP.length; }
+  g.userData.setData=()=>{ sel=null; done={}; flashKey=null; CAMP.forEach(c=>{ const cd=cards[c.k]; cd.target.copy(cd.home); cd.rx=-0.7; }); refresh(); };
+  g.userData.click=(id)=>{
+    const [kind,k]=id.split(':'); if(!k) return;
+    if(kind==='c'){ if(done[k]) return; sel=k; g.userData.emit('say',CAMP.find(c=>c.k===k).en); g.userData.emit('tap'); refresh(); return; }
+    if(kind==='o'){
+      if(done[k]) return;
+      if(!sel){ g.userData.status='اختر بطاقة كلمة أولًا'; return; }
+      if(sel===k){ done[k]=1; const cd=cards[k]; cd.target.copy(tops[k]); cd.rx=0; sel=null; g.userData.emit('ok'); refresh(); if(Object.keys(done).length===CAMP.length) setTimeout(()=>g.userData.emit('say','Well done!'),600); }
+      else { flashKey=sel; flashUntil=performance.now()+700; g.userData.emit('bad'); refresh(); }
+    }
+  };
+  g.userData.tick=(t)=>{
+    if(flashKey && t>flashUntil){ flashKey=null; refresh(); }
+    CAMP.forEach(c=>{ const cd=cards[c.k]; cd.m.position.lerp(cd.target,0.15); cd.m.rotation.x+=(cd.rx-cd.m.rotation.x)*0.15; });
+    const pa=fg.attributes.position; for(let i=0;i<pa.count;i++){ const xx=pa.getX(i)+0.06; pa.setZ(i,Math.sin(t*0.006+xx*40)*0.008*xx/0.12); } pa.needsUpdate=true;
+  };
+  return g;
+}
+
+/* ---- 3. choose the path ---- */
+const PATH_START=[0,0.4], PATH_J=[0,0.12], PATH_ENDS=[[-0.36,-0.3],[0,-0.36],[0.36,-0.3]];
+function buildPaths(){
+  const g=new THREE.Group(); speakable(g);
+  const ground=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.03,1.0), new THREE.MeshStandardMaterial({color:0x8fae6a, roughness:1})); ground.position.y=-0.055; g.add(ground);
+  const roadM=new THREE.MeshStandardMaterial({color:0xcdb88c, roughness:1});
+  const road=(a,b,act)=>{ const dx=b[0]-a[0], dz=b[1]-a[1], L=Math.hypot(dx,dz); const m=new THREE.Mesh(new THREE.BoxGeometry(0.075,0.006,L),roadM); m.position.set((a[0]+b[0])/2,-0.038,(a[1]+b[1])/2); m.rotation.y=Math.atan2(dx,dz); if(act) m.userData.act=act; g.add(m); };
+  road(PATH_START,PATH_J); PATH_ENDS.forEach((e,i)=>road(PATH_J,e,'p:'+i));
+  const prompt=makeBoard(0.7,0.15,(x,W,Hh,ar,n,N)=>{ ctext(x,ar||'',W/2,Hh*0.42,fitText(x,ar||'',W-60,70),'#e8c978',800,true); ctext(x,N?('Choose the right path  ·  '+n+' / '+N):'',W/2,Hh*0.8,28,'#96a6c2',600); });
+  prompt.position.set(0,0.36,-0.47); g.add(prompt);
+  const postM=new THREE.MeshStandardMaterial({color:0x6b4a2b});
+  let signs=[];
+  PATH_ENDS.forEach((e,i)=>{ const post=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.12,8),postM); post.position.set(e[0],0.02,e[1]); post.userData.act='p:'+i; g.add(post); });
+  const man=makeMan(0x3f5a78); g.add(man);
+  const conf=[]; for(let i=0;i<40;i++){ const c=new THREE.Mesh(new THREE.BoxGeometry(0.01,0.01,0.002), new THREE.MeshBasicMaterial({color:[0xe8c978,0x55c08f,0xe2705f,0x3d8bd9][i%4]})); c.visible=false; c.raycast=noRay; g.add(c); conf.push({m:c,v:new THREE.Vector3()}); }
+  let rounds=[], r=0, walk=null, state='idle', wait=0, confT=0, lt=0;
+  function setRound(){
+    signs.forEach(m=>disposeMesh(m)); signs=[];
+    const R=rounds[r]; man.position.set(PATH_START[0],-0.04,PATH_START[1]); man.rotation.y=0; man.userData.cloth.color.setHex(0x3f5a78);
+    if(!R){ prompt.userData.redraw('أحسنت! أنهيت كل الجولات',0,0); g.userData.status='✓ '+rounds.length+' من '+rounds.length; state='end'; return; }
+    prompt.userData.redraw(R.ar, r+1, rounds.length);
+    R.opts.forEach((w,i)=>{ const m=makeTile(w,0.06); const e=PATH_ENDS[i]; m.position.set(e[0],0.1,e[1]); m.userData.act='p:'+i; g.add(m); signs.push(m); });
+    state='idle'; g.userData.status='الجولة '+(r+1)+' من '+rounds.length;
+  }
+  g.userData.setData=(slide)=>{ rounds=((slide&&slide.data&&slide.data.rounds)||[]).filter(x=>x&&x.opts&&x.opts.length); r=0; walk=null; conf.forEach(c=>c.m.visible=false); setRound(); };
+  g.userData.refreshMeshes=true;
+  g.userData.click=(id)=>{
+    if(state!=='idle' || id.indexOf('p:')!==0) return; const k=+id.slice(2), R=rounds[r]; if(!R||k>=R.opts.length) return;
+    g.userData.emit('say',R.opts[k]); g.userData.emit('tap');
+    walk={pts:[PATH_START,PATH_J,PATH_ENDS[k]], seg:0, u:0, k}; state='walk';
+  };
+  g.userData.tick=(t)=>{
+    const dt=Math.min(0.1,lt?(t-lt)/1000:0); lt=t;
+    if(state==='walk'||state==='back'){
+      const P=walk.pts, a=P[walk.seg], b=P[walk.seg+1], L=Math.hypot(b[0]-a[0],b[1]-a[1]);
+      walk.u+=0.38*dt/L; if(walk.u>=1){ walk.seg++; walk.u=0; }
+      if(walk.seg>=P.length-1){
+        const e=P[P.length-1]; man.position.set(e[0],-0.04,e[1]);
+        if(state==='walk'){
+          if(walk.k===rounds[r].a){ state='win'; wait=t+1600; confT=t; g.userData.emit('ok'); g.userData.status='✓ صحيح'; conf.forEach(c=>{ c.m.visible=true; c.m.position.set(e[0],0.12,e[1]); c.v.set((Math.random()-0.5)*0.004,0.004+Math.random()*0.004,(Math.random()-0.5)*0.004); }); }
+          else { state='oops'; wait=t+900; g.userData.emit('bad'); man.userData.cloth.color.setHex(0xc0473a); g.userData.status='✗ ليس هذا الطريق'; }
+        } else { state='idle'; man.userData.cloth.color.setHex(0x3f5a78); g.userData.status='الجولة '+(r+1)+' من '+rounds.length; }
+      } else {
+        const x0=a[0]+(b[0]-a[0])*walk.u, z0=a[1]+(b[1]-a[1])*walk.u; man.position.set(x0,-0.04,z0); man.rotation.y=Math.atan2(-(b[0]-a[0]),-(b[1]-a[1]));
+      }
+      walkAnim(man,t,true);
+    } else walkAnim(man,t,false);
+    if(state==='oops'){ man.position.y=-0.04+Math.abs(Math.sin(t*0.02))*0.02; if(t>wait){ walk={pts:walk.pts.slice().reverse(), seg:0, u:0}; state='back'; } }
+    if(state==='win'){ conf.forEach(c=>{ c.m.position.addScaledVector(c.v,dt*60); c.v.y-=0.00012*dt*60; c.m.rotation.x+=0.2; c.m.rotation.y+=0.15; }); if(t>wait){ conf.forEach(c=>c.m.visible=false); r++; setRound(); } }
+  };
+  return g;
+}
+
+/* ---- 4. town directions ---- */
+const TOWN=[['School','Bank','Hospital'],['Park','Mosque','Hotel'],['Police','Market','Post Office']];
+const TOWN_COL=[[0xd9c27a,0x8fa3c4,0xf1f1ee],[0x6e9a52,0x2f8f6a,0xc98a5a],[0x3d5f8f,0xd88a3e,0xc0473a]];
+const TN=i=>-0.36+i*0.24;
+function buildTown(){
+  const g=new THREE.Group(); speakable(g);
+  const ground=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.03,1.0), new THREE.MeshStandardMaterial({color:0x9db07a, roughness:1})); ground.position.y=-0.055; g.add(ground);
+  const roadM=new THREE.MeshStandardMaterial({color:0x4a4f57, roughness:.9});
+  for(let i=0;i<4;i++){ const a=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.004,0.05),roadM); a.position.set(0,-0.038,TN(i)); g.add(a); const b=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.004,0.8),roadM); b.position.set(TN(i),-0.0375,0); g.add(b); }
+  const bld={};
+  TOWN.forEach((row,bz)=>row.forEach((name,bx)=>{
+    const x=TN(bx)+0.12, z=TN(bz)+0.12, h=0.05+((bx*7+bz*3)%4)*0.02;
+    const grp=new THREE.Group(); grp.position.set(x,-0.04,z);
+    const b=new THREE.Mesh(new THREE.BoxGeometry(0.15,h,0.15), new THREE.MeshStandardMaterial({color:TOWN_COL[bz][bx], roughness:.7})); b.position.y=h/2; grp.add(b);
+    if(name==='Mosque'){ const d=new THREE.Mesh(new THREE.SphereGeometry(0.045,20,12,0,Math.PI*2,0,Math.PI/2), new THREE.MeshStandardMaterial({color:0xc9a24a, metalness:.4})); d.position.y=h; grp.add(d); const mn=new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.012,0.14,10), new THREE.MeshStandardMaterial({color:0xf4f1ea})); mn.position.set(0.06,0.07,0.06); grp.add(mn); }
+    if(name==='Park'){ b.scale.y=0.15; b.position.y=0.004; [[-0.04,-0.03],[0.04,0.03],[-0.03,0.04]].forEach(([a,c])=>{ const tr=new THREE.Mesh(new THREE.SphereGeometry(0.025,10,8), new THREE.MeshStandardMaterial({color:0x3f6e32})); tr.position.set(a,0.035,c); grp.add(tr); }); }
+    const sign=makeTile(name,0.04); sign.position.set(0,(name==='Park'?0.07:h+0.05),0.02); sign.rotation.x=-0.7; sign.raycast=noRay; grp.add(sign);
+    g.add(grp); bld[name]={grp, sign, bx, bz, base:b};
+  }));
+  const prompt=makeBoard(1.0,0.24,(x,W,Hh,en,ar,n,N)=>{
+    x.font='800 52px '+FONT; const words=String(en||'').split(' '), lines=[]; let cur='';
+    words.forEach(w=>{ const t=cur?cur+' '+w:w; if(x.measureText(t).width>W-80 && cur){ lines.push(cur); cur=w; } else cur=t; }); if(cur) lines.push(cur);
+    const L=lines.slice(0,3), lh=L.length>2?50:58, y0=Hh*0.42-(L.length-1)*lh/2;
+    L.forEach((l,i)=>ctext(x,l,W/2,y0+i*lh,L.length>2?44:52,'#f4f1ea',800));
+    ctext(x,ar||'',W/2,Hh*0.86,30,'#e8c978',700,true); if(N) ctext(x,n+' / '+N,70,Hh*0.86,26,'#96a6c2',700); });
+  prompt.position.set(0,0.3,-0.56); g.add(prompt);
+  const btns=[['L','Turn left',-0.29],['F','Go straight',0],['R','Turn right',0.29]].map(([k,label,x])=>{ const m=makeTile(label,0.065,{bg:'#1a3163',fg:'#e8c978',border:'#e8c978'}); m.position.set(x,0.0,0.58); m.rotation.x=-0.8; m.userData.act='cmd:'+k; g.add(m); return m; });
+  const man=makeMan(0x8a7f58); man.scale.setScalar(0.9); g.add(man);
+  const DIRS=[[0,-1],[1,0],[0,1],[-1,0]];
+  let rounds=[], r=0, node=[1,3], head=0, queue=[], anim=null, state='play', wait=0, lt=0;
+  const nodePos=(n)=>new THREE.Vector3(TN(n[0]),-0.04,TN(n[1]));
+  function setRound(){
+    Object.values(bld).forEach(b=>tint(b.sign,0xffffff));
+    const R=rounds[r];
+    if(!R){ prompt.userData.redraw(rounds.length?'Well done!':'', rounds.length?'أحسنت! وصلت لكل الأهداف':'', 0,0); g.userData.status=rounds.length?'✓ اكتمل':''; state='end'; return; }
+    prompt.userData.redraw(R.en, R.ar, r+1, rounds.length); g.userData.status='الجولة '+(r+1)+' من '+rounds.length; state='play';
+  }
+  g.userData.setData=(slide)=>{ rounds=((slide&&slide.data&&slide.data.rounds)||[]); r=0; node=[1,3]; head=0; queue=[]; anim=null; man.position.copy(nodePos(node)); man.rotation.y=0; setRound(); };
+  function reached(){ const R=rounds[r]; if(!R) return false; if(Array.isArray(R.at)) return node[0]===R.at[0]&&node[1]===R.at[1]; const b=bld[R.target]; if(!b) return false; return node[0]>=b.bx&&node[0]<=b.bx+1&&node[1]>=b.bz&&node[1]<=b.bz+1; }
+  g.userData.click=(id)=>{
+    if(id.indexOf('cmd:')!==0 || state!=='play' || queue.length>3) return; const k=id.slice(4);
+    g.userData.emit('say',{L:'Turn left',F:'Go straight',R:'Turn right'}[k]); g.userData.emit('tap');
+    const bm=btns[{L:0,F:1,R:2}[k]]; tint(bm,0xffe08a); setTimeout(()=>tint(bm,0xffffff),250);
+    queue.push(k);
+  };
+  g.userData.tick=(t)=>{
+    const dt=Math.min(0.1,lt?(t-lt)/1000:0); lt=t;
+    if(!anim && queue.length && state==='play'){
+      const k=queue.shift();
+      if(k==='L'||k==='R'){ const nh=(head+(k==='R'?1:3))%4; anim={type:'turn', from:-head*Math.PI/2, to:-head*Math.PI/2-(k==='R'?1:-1)*Math.PI/2, u:0}; head=nh; }
+      else { const nx=node[0]+DIRS[head][0], nz=node[1]+DIRS[head][1]; if(nx<0||nx>3||nz<0||nz>3){ g.userData.emit('bad'); g.userData.status='لا يوجد طريق هنا'; } else { anim={type:'move', from:nodePos(node), to:nodePos([nx,nz]), u:0}; node=[nx,nz]; } }
+    }
+    if(anim){
+      anim.u=Math.min(1,anim.u+dt*(anim.type==='move'?2.2:4));
+      if(anim.type==='turn') man.rotation.y=anim.from+(anim.to-anim.from)*anim.u; else man.position.lerpVectors(anim.from,anim.to,anim.u);
+      walkAnim(man,t,anim.type==='move');
+      if(anim.u>=1){ const was=anim.type; anim=null; if(was==='move'){ if(reached()){ const R=rounds[r]; state='win'; wait=t+1700; queue=[]; g.userData.emit('ok'); g.userData.emit('say','You are at the '+(R.target==='Police'?'police station':R.target.toLowerCase())+'.'); if(bld[R.target]) tint(bld[R.target].sign,0xa8f0c0); g.userData.status='✓ وصلت'; } else if(rounds[r]) g.userData.status='الجولة '+(r+1)+' من '+rounds.length; } }
+    } else walkAnim(man,t,false);
+    if(state==='win'){ const b=bld[(rounds[r]||{}).target]; if(b) b.grp.position.y=-0.04+Math.abs(Math.sin(t*0.012))*0.02; if(t>wait){ if(b) b.grp.position.y=-0.04; r++; setRound(); } }
+  };
+  return g;
+}
+function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): type==='rifle'?buildRifle(): type==='figure'?buildFigure(): type==='sight'?buildSight(): type==='aid'?buildAid(): type==='squad'?buildSquad(): type==='shadow'?buildShadow(): type==='nightsky'?buildNight(): type==='sentence'?buildSentence(): type==='label'?buildLabel(): type==='paths'?buildPaths(): type==='town'?buildTown(): new THREE.Group(); }
 
 function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function labelTexture(text, hl){
@@ -951,7 +1202,7 @@ function buildHotspots(slide){
   });
   return list;
 }
-function disposeTree(o){ o.traverse(c=>{ if(c.geometry) c.geometry.dispose(); if(c.material){ const m=c.material; if(m.map) m.map.dispose(); m.dispose(); } }); }
+function disposeTree(o){ o.traverse(c=>{ if(c.geometry) c.geometry.dispose(); const ms=Array.isArray(c.material)?c.material:(c.material?[c.material]:[]); ms.forEach(m=>{ if(typeof TILE_SIDE!=='undefined' && m===TILE_SIDE) return; if(m.map && m.map.dispose) m.map.dispose(); m.dispose(); }); }); }
 
 /* =====================================================================
    LINK (PeerJS over WebRTC + BroadcastChannel for same-device tabs)
@@ -1024,6 +1275,7 @@ function fillLessonSelect(sel, cur){
 }
 let curId = store.get('sharh.cur','map'); if(!libraryIds().includes(curId)) curId='map';
 const S = { lesson: lessonById(curId), i:0, hl:-1, ans:{} };
+function speak(text){ try{ if(!window.speechSynthesis||!text) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; u.rate=0.85; const v=speechSynthesis.getVoices().find(v=>/^en(-|_)/i.test(v.lang)); if(v) u.voice=v; speechSynthesis.speak(u); }catch(e){} }
 function quizOf(sl){ return (sl&&sl.quiz)||null; }
 function hideFind(i){ const q=quizOf(S.lesson.slides[i]); return !!(q&&q.kind==='find'&&S.ans[i]==null); }
 function scoreInfo(){ let t=0,c=0,a=0; S.lesson.slides.forEach((sl,i)=>{ if(sl.quiz){ t++; if(S.ans[i]!=null){ a++; if(S.ans[i]===sl.quiz.answer) c++; } } }); return {t,c,a}; }
@@ -1044,10 +1296,12 @@ function makeRig(parent){
       if(rig.model){ rig.root.remove(rig.model); disposeTree(rig.model); }
       rig.model=buildModel(slide.model); rig.type=slide.model; rig.root.add(rig.model); fresh=true;
       rig.model.userData.beat=()=>{ if(rig.onBeat) rig.onBeat(); };
+      rig.model.userData.emit=(k,p)=>{ if(rig.onAct) rig.onAct(k,p); };
       rig.root.quaternion.identity(); rig.target.identity();
     }
-    rig.exp = slide.explode?1:0; if(fresh) rig.expCur=rig.exp;
+    rig.exp = slide.explode?1:0; if(fresh) rig.expCur=rig.exp; rig.curQuiz=!!slide.quiz;
     if(rig.model.userData.setPose) rig.model.userData.setPose(slide.pose||'standing', fresh);
+    if(rig.model.userData.setData) rig.model.userData.setData(slide);
     rig.hs.forEach(h=>{ rig.root.remove(h.grp); h.grp.traverse(c=>{ if(c.geometry) c.geometry.dispose(); }); h.tex.forEach(t=>t.dispose()); h.sp.material.dispose(); });
     rig.hs = buildHotspots(slide); rig.hs.forEach(h=>{ rig.root.add(h.grp); if(hide){ h.sp.visible=false; h.line.visible=false; } });
     rig.hits = rig.hs.map(h=>h.hit);
@@ -1056,15 +1310,17 @@ function makeRig(parent){
   };
   rig.update = function(t){
     const M=rig.model; if(!M) return;
+    if(M.userData.refreshMeshes && (rig._mf=(rig._mf||0)+1)%20===0){ rig.meshes=[]; M.traverse(c=>{ if(c.isMesh) rig.meshes.push(c); }); }
     if(M.userData.parts){
       const dv=rig.exp-rig.expCur; rig.expCur = Math.abs(dv)<0.002 ? rig.exp : rig.expCur+dv*0.08;
       const P=M.userData.parts; for(const k in P) P[k].obj.position.copy(P[k].off).multiplyScalar(rig.expCur);
       rig.hs.forEach(h=>{ if(h.part && P[h.part]) h.grp.position.copy(h.base).add(P[h.part].obj.position); });
     }
     if(M.userData.tick) M.userData.tick(t);
-    const st=M.userData.status||''; if(st!==rig.status){ rig.status=st; if(rig.onStatus) rig.onStatus(st); }
+    const st=(rig.curQuiz?'':M.userData.status)||''; if(st!==rig.status){ rig.status=st; if(rig.onStatus) rig.onStatus(st); }
     if(M.userData.needle) M.userData.needle.rotation.y=Math.sin(t/900)*0.06;
   };
+  rig.act = function(id){ if(rig.model && rig.model.userData.click){ rig.model.userData.click(id); rig.meshes=[]; rig.model.traverse(c=>{ if(c.isMesh) rig.meshes.push(c); }); } };
   rig.reveal = function(){ rig.hs.forEach(h=>{ h.sp.visible=true; h.line.visible=true; }); };
   rig.setHL = function(i){ rig.hs.forEach((h,k)=>{ const on=k===i; h.sp.material.map=h.tex[on?1:0]; h.sp.material.needsUpdate=true; h.dot.scale.setScalar(on?1.8:1); }); };
   return rig;
@@ -1099,6 +1355,7 @@ function startBoard(){
   addEventListener('pointerdown',initAudio); addEventListener('keydown',initAudio);
   rig.onBeat=()=>{ if(!bactx) return; const o=bactx.createOscillator(), gn=bactx.createGain(), t=bactx.currentTime; o.frequency.value=1050; gn.gain.setValueAtTime(.12,t); gn.gain.exponentialRampToValueAtTime(.0001,t+.06); o.connect(gn).connect(bactx.destination); o.start(t); o.stop(t+.08); };
   rig.onStatus=(st)=>{ const el=$('#bStat'); el.hidden=!st; el.textContent=st; };
+  rig.onAct=(k,p)=>{ if(k==='ok') tone(true); else if(k==='bad') tone(false); else if(k==='say') speak(p); else if(k==='tap' && bactx){ const o=bactx.createOscillator(), gn=bactx.createGain(), t=bactx.currentTime; o.frequency.value=660; gn.gain.setValueAtTime(.08,t); gn.gain.exponentialRampToValueAtTime(.0001,t+.05); o.connect(gn).connect(bactx.destination); o.start(t); o.stop(t+.07); } };
   B={renderer,scene,camera,rig};
 
   function sizeIt(){
@@ -1127,7 +1384,8 @@ function startBoard(){
     sl.points.forEach(p=>{ const li=document.createElement('li'); li.textContent=p; ul.appendChild(li); });
     const lg=$('#bLegend'); lg.textContent='';
     if(!hideFind(S.i)) (sl.hotspots||[]).forEach((h,k)=>{ const s=document.createElement('span'); s.textContent=h.label; if(k===S.hl) s.className='hl'; lg.appendChild(s); });
-    const qb=$('#bQuiz'); qb.textContent=''; qb.hidden=!q;
+    const qb=$('#bQuiz'); qb.textContent=''; qb.hidden=!q && !ACT_MODELS[sl.model];
+    if(!q && ACT_MODELS[sl.model]){ const rb=document.createElement('button'); rb.className='btn mini'; rb.style.alignSelf='flex-start'; rb.textContent='إعادة النشاط'; rb.addEventListener('click',()=>{ Link.send({t:'actreset'}); setSlide(S.i,true); }); qb.appendChild(rb); }
     if(q){
       const pk=S.ans[S.i];
       if(q.kind==='choice') q.options.forEach((o,k)=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=o; if(pk!=null){ b.disabled=true; if(k===q.answer) b.classList.add('ok'); else if(k===pk) b.classList.add('bad'); } b.addEventListener('click',()=>boardAnswer(S.i,k)); qb.appendChild(b); });
@@ -1137,7 +1395,7 @@ function startBoard(){
     }
     const sc=scoreInfo(), se=$('#bScore'); se.hidden=!(sc.t&&sc.a); se.textContent='النتيجة '+sc.c+' من '+sc.t;
     $('#bPrev').disabled=S.i===0; $('#bNext').disabled=S.i===L.slides.length-1;
-    $('#bHint').hidden = sl.model==='none';
+    $('#bHint').hidden = sl.model==='none' || !!ACT_MODELS[sl.model];
     $('#bExplode').hidden = sl.model!=='rifle'; $('#bExplode').textContent = rig.exp?'تركيب':'تفكيك';
   }
   function setSlide(i, remote){
@@ -1182,10 +1440,11 @@ function startBoard(){
   cvs.addEventListener('pointerdown',e=>{
     if(placing){ setNdc(e); const h=ray.intersectObjects(rig.meshes)[0]; if(h){ const p=rig.root.worldToLocal(h.point.clone()); finishPlace([+p.x.toFixed(3), +(p.y+0.01).toFixed(3), +p.z.toFixed(3)]); } return; }
     if(hideFind(S.i)){ setNdc(e); const h=ray.intersectObjects(rig.hits)[0]; if(h){ boardAnswer(S.i,h.object.userData.hotspot); return; } }
+    if(ACT_MODELS[rig.type] && !quizOf(S.lesson.slides[S.i])){ setNdc(e); const h=ray.intersectObjects(rig.meshes)[0]; if(h && h.object.userData.act){ const id=h.object.userData.act; rig.act(id); Link.send({t:'act',id}); return; } }
     drag={x:e.clientX,y:e.clientY}; cvs.setPointerCapture(e.pointerId);
   });
   cvs.addEventListener('pointermove',e=>{
-    if(!drag) return;
+    if(!drag){ if(ACT_MODELS[rig.type]||hideFind(S.i)){ setNdc(e); const h=ray.intersectObjects(hideFind(S.i)?rig.hits:rig.meshes)[0]; cvs.style.cursor=(h&&(h.object.userData.act||h.object.userData.hotspot!=null))?'pointer':'grab'; } else cvs.style.cursor='grab'; return; }
     const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag.x=e.clientX; drag.y=e.clientY;
     qa.setFromAxisAngle(ax.set(0,1,0), dx*0.008); rig.target.premultiply(qa);
     qa.setFromAxisAngle(ax.set(1,0,0), dy*0.008); rig.target.premultiply(qa);
@@ -1244,6 +1503,9 @@ function startBoard(){
       const xo=c.querySelector('.xopt');
       if(sl.model==='rifle'){ xo.innerHTML='<label style="display:flex;gap:8px;align-items:center;font-size:15px"><input type="checkbox" id="sx'+k+'"> عرض السلاح مفككًا في هذه الخطوة</label>'; const cb=xo.querySelector('input'); cb.checked=!!sl.explode; cb.addEventListener('change',()=>sl.explode=cb.checked); }
       else if(sceneNames(sl.model)){ const NM=sceneNames(sl.model); xo.className='field xopt'; xo.innerHTML='<label for="so'+k+'">المشهد</label><select id="so'+k+'"></select>'; const ps=xo.querySelector('select'); Object.keys(NM).forEach(key=>{ const o=document.createElement('option'); o.value=key; o.textContent=NM[key]; ps.appendChild(o); }); ps.value=NM[sl.pose]?sl.pose:Object.keys(NM)[0]; sl.pose=ps.value; ps.addEventListener('change',()=>sl.pose=ps.value); }
+      if(sl.model==='sentence'){ sl.data=sl.data||{words:['I','am','ready'],ar:'أنا جاهز'}; xo.className='field xopt'; xo.innerHTML='<label for="se'+k+'">الجملة الإنجليزية الصحيحة</label><input id="se'+k+'" dir="ltr"><label for="sa'+k+'">المعنى بالعربي</label><input id="sa'+k+'">'; const a=xo.querySelector('#se'+k), b=xo.querySelector('#sa'+k); a.value=(sl.data.words||[]).join(' '); b.value=sl.data.ar||''; a.addEventListener('input',()=>sl.data.words=a.value.trim().split(/\s+/).filter(Boolean)); b.addEventListener('input',()=>sl.data.ar=b.value); }
+      else if(sl.model==='paths'){ sl.data=sl.data||{rounds:[]}; xo.className='field xopt'; xo.innerHTML='<label for="pr'+k+'">الجولات: الكلمة العربية | الخيارات، وضع * قبل الصحيح</label><textarea id="pr'+k+'" dir="rtl" placeholder="سيارة | Cat, *Car, Card"></textarea>'; const ta=xo.querySelector('textarea'); ta.value=(sl.data.rounds||[]).map(R=>R.ar+' | '+R.opts.map((o,j)=>(j===R.a?'*':'')+o).join(', ')).join('\n'); ta.addEventListener('input',()=>{ sl.data.rounds=ta.value.split('\n').map(l=>{ const [ar,ops]=l.split('|'); if(!ops) return null; const arr=ops.split(',').map(x=>x.trim()).filter(Boolean).slice(0,3); const a=Math.max(0,arr.findIndex(x=>x[0]==='*')); return {ar:ar.trim(), opts:arr.map(x=>x.replace(/^\*/,'')), a}; }).filter(Boolean); }); }
+      else if(sl.model==='town'){ sl.data=sl.data||{rounds:[]}; xo.className='field xopt'; xo.innerHTML='<label for="tw'+k+'">الأهداف: اسم المبنى | التعليمات بالإنجليزية | المعنى بالعربي</label><textarea id="tw'+k+'" placeholder="Hospital | Go to the hospital. | اذهب إلى المستشفى"></textarea><span style="color:var(--mute);font-size:13px">المباني: School, Bank, Hospital, Park, Mosque, Hotel, Police, Market, Post Office</span>'; const ta=xo.querySelector('textarea'); ta.value=(sl.data.rounds||[]).map(R=>[R.target,R.en,R.ar].join(' | ')).join('\n'); ta.addEventListener('input',()=>{ sl.data.rounds=ta.value.split('\n').map(l=>{ const p=l.split('|').map(x=>x.trim()); return p[0]?{target:p[0],en:p[1]||'',ar:p[2]||''}:null; }).filter(Boolean); }); }
       const qo=c.querySelector('.qopt'), qk=sl.quiz?sl.quiz.kind:'none';
       qo.innerHTML='<div class="field"><label for="sk'+k+'">نوع الخطوة</label><select id="sk'+k+'"><option value="none">شرح</option><option value="choice">سؤال اختيار من متعدد</option><option value="find">سؤال: أشر إلى الجزء</option></select></div>';
       const ks=qo.querySelector('select'); ks.value=qk;
@@ -1327,6 +1589,8 @@ function startBoard(){
     else if(m.t==='rot' && Array.isArray(m.q) && !drag){ rig.target.fromArray(m.q); }
     else if(m.t==='exp'){ rig.exp=m.v?1:0; $('#bExplode').textContent=rig.exp?'تركيب':'تفكيك'; }
     else if(m.t==='ans' && typeof m.i==='number'){ boardAnswer(m.i,m.pick,true); }
+    else if(m.t==='act' && typeof m.id==='string'){ rig.act(m.id); }
+    else if(m.t==='actreset'){ setSlide(S.i,true); }
     else if(m.t==='qreset'){ S.ans={}; setSlide(S.i,true); }
     else if(m.t==='ptr'){
       if(Array.isArray(m.p)){ rig.pointer.position.fromArray(m.p); rig.pointer.visible=true; } else rig.pointer.visible=false;
@@ -1380,6 +1644,7 @@ function startHeadset(){
   const baseScale=()=>((VIEW[rig.type]&&VIEW[rig.type].xr)||0.6)*zf;
   const rig=makeRig(stage);
   rig.onStatus=()=>drawPanel(); rig.onBeat=()=>beep(1050,.05);
+  rig.onAct=(k,p)=>{ if(k==='ok'){ beep(880,.14); setTimeout(()=>beep(1320,.22),120); pulseAll(.6,80); } else if(k==='bad'){ beep(190,.35); pulseAll(1,200); } else if(k==='tap'){ beep(660,.05); pulseAll(.25,25); } else if(k==='say' && !Link.alive()) speak(p); };
   const ringUnder=new THREE.Mesh(new THREE.RingGeometry(0.55,0.57,64), new THREE.MeshBasicMaterial({color:0xc9a24a, side:THREE.DoubleSide, transparent:true, opacity:.7}));
   ringUnder.rotation.x=-Math.PI/2; ringUnder.position.y=-0.055; ringUnder.raycast=noRay; stage.add(ringUnder);
 
@@ -1474,6 +1739,7 @@ function startHeadset(){
     beep(880,.05);
     if(id==='prev') setSlide(S.i-1); else if(id==='next') setSlide(S.i+1); else if(id==='exit') exitAll();
     else if(id==='exp'){ rig.exp=rig.exp?0:1; Link.send({t:'exp',v:rig.exp}); drawPanel(); }
+    else if(id==='reset' && ACT_MODELS[rig.type] && !quizOf(S.lesson.slides[S.i])){ Link.send({t:'actreset'}); setSlide(S.i,true); }
     else if(id==='reset'){ zf=1; stage.position.copy(STAGE0); stage.scale.setScalar(baseScale()); rig.root.quaternion.identity(); rig.target.identity(); Link.send({t:'rot',q:[0,0,0,1]}); }
   }
 
@@ -1481,6 +1747,7 @@ function startHeadset(){
   let actx=null;
   function ensureAudio(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){} }
   function beep(f,d){ if(!actx) return; const o=actx.createOscillator(), g=actx.createGain(), t=actx.currentTime; o.frequency.value=f; g.gain.setValueAtTime(.08,t); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(g).connect(actx.destination); o.start(t); o.stop(t+d+.02); }
+  function pulseAll(v,ms){ try{ const s=renderer.xr.getSession(); if(s) for(const src of s.inputSources) pulse(src,v,ms); }catch(e){} }
   function pulse(src,v,ms){ try{ const h=src&&src.gamepad&&src.gamepad.hapticActuators&&src.gamepad.hapticActuators[0]; if(h&&h.pulse) h.pulse(v,ms); }catch(e){} }
 
   // ---- pointing / dragging
@@ -1514,6 +1781,7 @@ function startHeadset(){
     if(!hit) return;
     if(hit.object===panel){ const id=panelButtonAt(ray); if(id){ pulse(src,.3,30); action(id); } return; }
     if(hit.object.userData.hotspot!=null && hideFind(S.i)){ hsAnswer(S.i, hit.object.userData.hotspot, false, src); return; }
+    if(hit.object.userData.act && !quizOf(S.lesson.slides[S.i])){ const id=hit.object.userData.act; rig.act(id); Link.send({t:'act',id}); return; }
     // start rotate drag
     if(ctrlObj){ ctrlObj.getWorldQuaternion(tmpQ); drag={ctrl:ctrlObj, q0:tmpQ.clone(), m0:rig.root.quaternion.clone()}; pulse(src,.4,40); }
   }
@@ -1570,6 +1838,7 @@ function startHeadset(){
     if(mode!=='desk') return; ensureAudio(); mray(e); const h=hitTest(); if(!h) return;
     if(h.object===panel){ const id=panelButtonAt(ray); if(id) action(id); return; }
     if(h.object.userData.hotspot!=null && hideFind(S.i)){ hsAnswer(S.i, h.object.userData.hotspot); return; }
+    if(h.object.userData.act && !quizOf(S.lesson.slides[S.i])){ const id=h.object.userData.act; rig.act(id); Link.send({t:'act',id}); return; }
     mdrag={x:e.clientX,y:e.clientY}; cvs.setPointerCapture(e.pointerId);
   });
   cvs.addEventListener('pointermove',e=>{
@@ -1592,6 +1861,8 @@ function startHeadset(){
   Link.onMsg=(m)=>{
     if(m.t==='lesson' && validLesson(m.lesson)){ S.lesson=normalizeLesson(m.lesson); S.ans={}; rig.type=null; setSlide(typeof m.i==='number'?m.i:S.i,true); }
     else if(m.t==='ans' && typeof m.i==='number'){ hsAnswer(m.i,m.pick,true); }
+    else if(m.t==='act' && typeof m.id==='string'){ rig.act(m.id); }
+    else if(m.t==='actreset'){ setSlide(S.i,true); }
     else if(m.t==='qreset'){ S.ans={}; setSlide(S.i,true); }
     else if(m.t==='slide'){ setSlide(m.i,true); }
     else if(m.t==='rot' && Array.isArray(m.q) && !drag && !mdrag){ rig.target.fromArray(m.q); rig.root.quaternion.copy(rig.target); }
