@@ -477,15 +477,26 @@ const ENG = {
     {title:'Turn right تعني:', model:'town', points:[], hotspots:[], data:{rounds:[]}, quiz:{kind:'choice', options:['انعطف يمينًا','انعطف يسارًا','امشِ للأمام'], answer:0}}
   ]
 };
-const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}, {id:'marks', lesson:MARKS}, {id:'aid', lesson:AIDL}, {id:'forms', lesson:FORMS}, {id:'nav', lesson:NAV}, {id:'eng', lesson:ENG}];
-const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', rifle:'سلاح تدريبي (قابل للتفكيك)', figure:'وضعية الرامي', sight:'صورة التصويب', aid:'مُسعف ومصاب', squad:'مجموعة أفراد (تشكيلات)', sentence:'نشاط: ترتيب الجملة', label:'نشاط: ضع الكلمة في مكانها', paths:'نشاط: اختر الطريق', town:'نشاط: اتجاهات الطريق', shadow:'ظل العصا والشمس', nightsky:'سماء الليل', none:'بدون مجسّم'};
+const KIM = {
+  title:'تدريب الملاحظة والذاكرة (لعبة كيم)',
+  slides:[
+    {title:'لعبة كيم', model:'kim', points:['تمرين يقوّي الملاحظة والذاكرة، ويُستخدم في تدريب الاستطلاع','تظهر أدوات ميدانية لوقت قصير ثم تُغطّى','عند كشفها يكون شيء قد تغيّر: اكتشفه بأسرع وقت'], data:{mode:'view', seed:'k0', time:15}},
+    {title:'الجولة 1: ما المفقود؟', model:'kim', points:['اضغط «ابدأ» وتذكّر الأدوات ومواقعها','بعد كشف الغطاء انقر المكان الذي اختفت منه الأداة'], data:{mode:'missing', seed:'k1', time:12}},
+    {title:'الجولة 2: أي أداتين تبادلتا المكان؟', model:'kim', points:['تذكّر موقع كل أداة','انقر الأداتين اللتين تبادلتا مكانيهما'], data:{mode:'swap', seed:'k2', time:12}},
+    {title:'الجولة 3: ما الذي تبدّل؟', model:'kim', points:['إحدى الأدوات ستُستبدل بأداة أخرى','انقر الأداة الجديدة'], data:{mode:'change', seed:'k3', time:10}},
+    {title:'الجولة 4: نظرة خاطفة', model:'kim', points:['خمس ثوانٍ فقط للملاحظة','ركّز على العدد والمواقع'], data:{mode:'missing', seed:'k4', time:5}},
+    {title:'نصائح للملاحظة', model:'kim', points:['قسّم المشهد إلى صفوف وانظر صفًا صفًا','عدّ الأدوات أولًا: العدد يكشف المفقود بسرعة','اربط كل أداة بكلمة أو قصة قصيرة','كرّر التمرين وزِد الصعوبة بتقليل الوقت'], data:{mode:'view', seed:'k5', time:15}}
+  ]
+};
+const LIBRARY = [{id:'map', lesson:SAMPLE}, {id:'fire', lesson:FIRE}, {id:'marks', lesson:MARKS}, {id:'aid', lesson:AIDL}, {id:'forms', lesson:FORMS}, {id:'nav', lesson:NAV}, {id:'eng', lesson:ENG}, {id:'kim', lesson:KIM}];
+const MODEL_NAMES = {terrain:'مجسّم تضاريس (كنتور)', compass:'بوصلة', extinguisher:'طفاية حريق', rifle:'سلاح تدريبي (قابل للتفكيك)', figure:'وضعية الرامي', sight:'صورة التصويب', aid:'مُسعف ومصاب', squad:'مجموعة أفراد (تشكيلات)', sentence:'نشاط: ترتيب الجملة', label:'نشاط: ضع الكلمة في مكانها', paths:'نشاط: اختر الطريق', town:'نشاط: اتجاهات الطريق', kim:'نشاط: لعبة كيم (الملاحظة)', shadow:'ظل العصا والشمس', nightsky:'سماء الليل', none:'بدون مجسّم'};
 const FORM_NAMES = {file:'الرتل الفردي', column:'الرتل المزدوج', line:'الخط', wedge:'الإسفين'};
 const SHADOW_NAMES = {sun:'حركة الشمس والظل', marks:'العلامتان', north:'تحديد الشمال'};
 const SKY_NAMES = {dipper:'الدب الأكبر', pointer:'نجما الدليل', rotate:'دوران السماء', plain:'بدون إرشادات (للأسئلة)'};
 const AID_NAMES = {assess:'تقييم المصاب', pressure:'ضغط مباشر على الجرح', tourniquet:'الرباط الضاغط', recovery:'وضعية الإفاقة', cpr:'الإنعاش القلبي (مستمر)', cpr30:'الإنعاش 30:2 مع العدّاد', evac:'طلب الإسعاف'};
 const POSE_NAMES = {standing:'الوقوف', kneeling:'الجثو', prone:'الانبطاح'};
-const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}, rifle:{y:0.04,h:0.45,d:1.2,xr:0.75}, figure:{y:0.26,h:0.32,d:1.6,xr:0.7}, sight:{y:0.28,h:0.12,d:1.22,xr:0.8}, aid:{y:0.14,h:0.5,d:1.35,xr:0.75}, squad:{y:0.0,h:0.85,d:1.15,xr:0.8}, shadow:{y:-0.02,h:1.15,d:1.12,xr:0.8}, nightsky:{y:0.22,h:0.12,d:1.25,xr:0.65}, sentence:{y:0.25,h:0.25,d:1.1,xr:0.8}, label:{y:0.04,h:0.6,d:1.15,xr:0.85}, paths:{y:0.03,h:0.75,d:1.2,xr:0.8}, town:{y:0.06,h:0.8,d:1.12,xr:0.8}};
-const ACT_MODELS={sentence:1,label:1,paths:1,town:1};
+const VIEW = {extinguisher:{y:0.27,h:0.3,d:1.25,xr:0.85}, rifle:{y:0.04,h:0.45,d:1.2,xr:0.75}, figure:{y:0.26,h:0.32,d:1.6,xr:0.7}, sight:{y:0.28,h:0.12,d:1.22,xr:0.8}, aid:{y:0.14,h:0.5,d:1.35,xr:0.75}, squad:{y:0.0,h:0.85,d:1.15,xr:0.8}, shadow:{y:-0.02,h:1.15,d:1.12,xr:0.8}, nightsky:{y:0.22,h:0.12,d:1.25,xr:0.65}, sentence:{y:0.25,h:0.25,d:1.1,xr:0.8}, label:{y:0.04,h:0.6,d:1.15,xr:0.85}, paths:{y:0.03,h:0.75,d:1.2,xr:0.8}, town:{y:0.06,h:0.8,d:1.12,xr:0.8}, kim:{y:0.04,h:0.9,d:1.0,xr:0.85}};
+const ACT_MODELS={sentence:1,label:1,paths:1,town:1,kim:1};
 function sceneNames(model){ return {figure:POSE_NAMES, aid:AID_NAMES, squad:FORM_NAMES, shadow:SHADOW_NAMES, nightsky:SKY_NAMES}[model]||null; }
 
 function validLesson(L){
@@ -1171,7 +1182,102 @@ function buildTown(){
   };
   return g;
 }
-function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): type==='rifle'?buildRifle(): type==='figure'?buildFigure(): type==='sight'?buildSight(): type==='aid'?buildAid(): type==='squad'?buildSquad(): type==='shadow'?buildShadow(): type==='nightsky'?buildNight(): type==='sentence'?buildSentence(): type==='label'?buildLabel(): type==='paths'?buildPaths(): type==='town'?buildTown(): new THREE.Group(); }
+/* ---- 5. Kim's game: observation & memory ---- */
+const KIM_ITEMS=[{k:'canteen',ar:'قارورة الماء'},{k:'torch',ar:'المصباح'},{k:'radio',ar:'جهاز اللاسلكي'},{k:'binos',ar:'المنظار'},{k:'notebook',ar:'الدفتر'},{k:'helmet',ar:'الخوذة'},{k:'aidkit',ar:'حقيبة الإسعاف'},{k:'map',ar:'الخريطة'},{k:'rope',ar:'الحبل'},{k:'watch',ar:'الساعة'},{k:'whistle',ar:'الصفارة'},{k:'cap',ar:'القبعة'}];
+const KIM_CELLS=[]; for(let r=0;r<3;r++) for(let c=0;c<3;c++) KIM_CELLS.push([-0.21+c*0.21,-0.21+r*0.21]);
+function kimItem(k){
+  const g=new THREE.Group(), M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7},o||{}));
+  const add=(geo,mat,x,y,z,rx,ry,rz)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(x||0,y||0,z||0); if(rx) m.rotation.x=rx; if(ry) m.rotation.y=ry; if(rz) m.rotation.z=rz; g.add(m); return m; };
+  if(k==='canteen'){ add(new THREE.CylinderGeometry(0.035,0.035,0.09,20),M(0x56653a),0,0.045); add(new THREE.CylinderGeometry(0.012,0.012,0.016,12),M(0x17191d),0,0.098); }
+  else if(k==='torch'){ add(new THREE.CylinderGeometry(0.015,0.015,0.1,14),M(0x17191d),-0.01,0.016,0,0,0,Math.PI/2); add(new THREE.CylinderGeometry(0.024,0.016,0.03,16),M(0x2c3036),0.055,0.024,0,0,0,Math.PI/2); add(new THREE.CircleGeometry(0.02,16),new THREE.MeshBasicMaterial({color:0xffe28a}),0.0705,0.024,0,0,Math.PI/2); }
+  else if(k==='radio'){ add(new THREE.BoxGeometry(0.07,0.1,0.035),M(0x3f4a2e),0,0.05); add(new THREE.CylinderGeometry(0.003,0.003,0.1,6),M(0x17191d),0.025,0.15); add(new THREE.BoxGeometry(0.05,0.03,0.002),M(0x17191d),0,0.07,0.018); }
+  else if(k==='binos'){ [-1,1].forEach(sd=>add(new THREE.CylinderGeometry(0.018,0.022,0.075,14),M(0x2c3036),sd*0.025,0.025,0,Math.PI/2)); add(new THREE.BoxGeometry(0.03,0.012,0.03),M(0x17191d),0,0.03); }
+  else if(k==='notebook'){ add(new THREE.BoxGeometry(0.08,0.012,0.105),M(0x8a2f2a),0,0.006); add(new THREE.BoxGeometry(0.072,0.004,0.097),M(0xf4f1ea),0.002,0.013); }
+  else if(k==='helmet'){ add(new THREE.SphereGeometry(0.052,20,12,0,Math.PI*2,0,Math.PI/2),M(0x56653a),0,0.004); add(new THREE.TorusGeometry(0.053,0.005,8,32),M(0x3f4a2e),0,0.005,0,Math.PI/2); }
+  else if(k==='aidkit'){ add(new THREE.BoxGeometry(0.09,0.05,0.065),M(0xf4f1ea),0,0.025); const t=canvasTex(128,128,(x,W)=>{ x.fillStyle='#f4f1ea'; x.fillRect(0,0,W,W); x.fillStyle='#c0392b'; x.beginPath(); x.arc(W/2,W/2,40,0,Math.PI*2); x.fill(); x.fillStyle='#f4f1ea'; x.beginPath(); x.arc(W/2+16,W/2-6,36,0,Math.PI*2); x.fill(); }); add(new THREE.PlaneGeometry(0.05,0.05),new THREE.MeshBasicMaterial({map:t}),0,0.0505,0,-Math.PI/2); }
+  else if(k==='map'){ const t=canvasTex(256,200,(x,W,Hh)=>{ x.fillStyle='#e9e1c6'; x.fillRect(0,0,W,Hh); x.strokeStyle='#8a6a45'; x.lineWidth=2; for(let i=0;i<6;i++){ x.beginPath(); x.ellipse(W*0.45,Hh*0.5,20+i*18,12+i*12,0.3,0,Math.PI*2); x.stroke(); } x.strokeStyle='#3d8bd9'; x.lineWidth=4; x.beginPath(); x.moveTo(0,Hh*0.8); x.bezierCurveTo(W*0.3,Hh*0.6,W*0.6,Hh,W,Hh*0.7); x.stroke(); x.strokeStyle='rgba(0,0,0,.25)'; x.lineWidth=1; for(let i=1;i<4;i++){ x.beginPath(); x.moveTo(i*W/4,0); x.lineTo(i*W/4,Hh); x.stroke(); } }); add(new THREE.BoxGeometry(0.12,0.004,0.094),[TILE_SIDE,TILE_SIDE,new THREE.MeshStandardMaterial({map:t}),TILE_SIDE,TILE_SIDE,TILE_SIDE],0,0.002,0,0,0.25); }
+  else if(k==='rope'){ add(new THREE.TorusGeometry(0.036,0.009,8,28),M(0xc4a26a),0,0.009,0,Math.PI/2); add(new THREE.TorusGeometry(0.026,0.009,8,24),M(0xb08f58),0,0.026,0,Math.PI/2); }
+  else if(k==='watch'){ add(new THREE.BoxGeometry(0.025,0.004,0.11),M(0x17191d),0,0.002); add(new THREE.CylinderGeometry(0.022,0.022,0.012,24),M(0xb9c0cc,{metalness:.7}),0,0.01); add(new THREE.CircleGeometry(0.018,24),new THREE.MeshBasicMaterial({color:0xf4f1ea}),0,0.0165,0,-Math.PI/2); }
+  else if(k==='whistle'){ add(new THREE.CylinderGeometry(0.012,0.012,0.055,14),M(0xb9c0cc,{metalness:.8,roughness:.25}),0,0.013,0,0,0,Math.PI/2); add(new THREE.TorusGeometry(0.012,0.003,8,16),M(0xb9c0cc,{metalness:.8}),0.04,0.013,0,Math.PI/2); }
+  else if(k==='cap'){ add(new THREE.SphereGeometry(0.045,20,12,0,Math.PI*2,0,Math.PI/2),M(0xa8956b),0,0.002); add(new THREE.BoxGeometry(0.05,0.004,0.04),M(0x8f7d55),0,0.004,0.055); }
+  return g;
+}
+function buildKim(){
+  const g=new THREE.Group(); speakable(g);
+  const table=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.04,0.8), new THREE.MeshStandardMaterial({color:0x5a4632, roughness:.8})); table.position.y=-0.04; g.add(table);
+  const tray=new THREE.Mesh(new THREE.BoxGeometry(0.68,0.012,0.68), new THREE.MeshStandardMaterial({color:0x3f4a2e, roughness:.9})); tray.position.y=-0.016; g.add(tray);
+  const ringM=new THREE.MeshBasicMaterial({color:0xe8c978, transparent:true, opacity:.28});
+  const hitM=new THREE.MeshBasicMaterial({visible:false});
+  KIM_CELLS.forEach((c,i)=>{ const r=new THREE.Mesh(new THREE.RingGeometry(0.055,0.062,32),ringM); r.rotation.x=-Math.PI/2; r.position.set(c[0],-0.0095,c[1]); r.raycast=noRay; g.add(r); const h=new THREE.Mesh(new THREE.PlaneGeometry(0.19,0.19),hitM); h.rotation.x=-Math.PI/2; h.position.set(c[0],-0.009,c[1]); h.userData.act='cell:'+i; g.add(h); });
+  const cloth=new THREE.Mesh(new THREE.BoxGeometry(0.74,0.012,0.74), new THREE.MeshStandardMaterial({color:0xa8956b, roughness:1, transparent:true, opacity:1})); cloth.raycast=noRay; g.add(cloth);
+  const prompt=makeBoard(0.8,0.18,(x,W,Hh,big,small)=>{ ctext(x,big||'',W/2,Hh*0.42,fitText(x,big||'',W-60,/^\d+$/.test(big||'')?110:66),'#e8c978',800,true); ctext(x,small||'',W/2,Hh*0.8,30,'#96a6c2',600,true); });
+  prompt.position.set(0,0.28,-0.46); g.add(prompt);
+  const start=makeTile('ابدأ',0.075,{rtl:true,bg:'#c9a24a',fg:'#0a1630',border:'#e8c978'}); start.rotation.x=-0.8; start.userData.act='start'; g.add(start);
+  const marks=[0xa8f0c0,0xa8f0c0,0xffb3b3,0xffb3b3,0xe8c978,0xe8c978].map(c=>{ const m=new THREE.Mesh(new THREE.RingGeometry(0.075,0.092,40), new THREE.MeshBasicMaterial({color:c, side:THREE.DoubleSide})); m.rotation.x=-Math.PI/2; m.visible=false; m.raycast=noRay; g.add(m); return m; });
+  let data={}, attempt=0, state='idle', items={}, answer=[], picks=[], tEnd=0, tAns=0, info='', lastSec=-1, changed=false;
+  g.userData.peek=()=>({state, answer:answer.slice()});
+  let clothY=0.02, clothTarget=0.02, clothOp=1, clothOpT=1;
+  function clearItems(){ Object.values(items).forEach(it=>disposeMesh(it.g)); items={}; }
+  function setActs(){ Object.entries(items).forEach(([cell,it])=>it.g.traverse(c=>{ if(c.isMesh) c.userData.act='cell:'+cell; })); }
+  function place(seed){
+    clearItems(); const pick=shuffled(KIM_ITEMS.map((x,i)=>i),seed);
+    for(let i=0;i<9;i++){ const it=KIM_ITEMS[pick[i]], m=kimItem(it.k); const c=KIM_CELLS[i]; m.position.set(c[0],-0.01,c[1]); m.rotation.y=(seeded(seed+i)()-0.5)*1.2; g.add(m); items[i]={g:m,k:it.k,ar:it.ar}; }
+    setActs(); return pick.slice(9);
+  }
+  let spare=[];
+  function show(big,small){ prompt.userData.redraw(big,small); }
+  function setStartVisible(v){ start.position.set(0, v?0.0:-2, v?0.45:0); }
+  function cover(on){ clothTarget=on?0.03:0.42; clothOpT=on?1:0; }
+  g.userData.setData=(slide)=>{
+    data=(slide&&slide.data)||{}; attempt=0; picks=[]; answer=[]; marks.forEach(m=>m.visible=false);
+    spare=place((data.seed||'kim')+'-0');
+    if(data.mode==='view' || !data.mode){ state='view'; cover(false); clothY=0.42; clothOp=0; setStartVisible(false); show('أدوات ميدانية','انظر إليها جيدًا'); g.userData.status=''; }
+    else { state='idle'; cover(true); clothY=0.03; clothOp=1; setStartVisible(true); show('اضغط «ابدأ»','ستظهر الأدوات '+(data.time||12)+' ثانية فقط'); g.userData.status='جاهز'; }
+  };
+  g.userData.refreshMeshes=true;
+  function begin(t){ changed=false; attempt++; marks.forEach(m=>m.visible=false); picks=[]; spare=place((data.seed||'kim')+'-'+attempt); state='observe'; tEnd=t+(data.time||12)*1000; lastSec=-1; cover(false); setStartVisible(false); }
+  function applyChange(){
+    if(changed) return; changed=true;
+    const r=seeded((data.seed||'kim')+'-'+attempt+'-chg');
+    const a=Math.floor(r()*9);
+    if(data.mode==='missing'){ answer=[a]; info='المفقود: '+items[a].ar; disposeMesh(items[a].g); delete items[a]; }
+    else if(data.mode==='swap'){ let b=Math.floor(r()*8); if(b>=a) b++; answer=[a,b]; info='تبادلت: '+items[a].ar+' و'+items[b].ar; const A=items[a], B=items[b]; items[a]=B; items[b]=A; [a,b].forEach(cl=>{ const c=KIM_CELLS[cl]; items[cl].g.position.set(c[0],-0.01,c[1]); }); }
+    else { answer=[a]; const it=KIM_ITEMS[spare[Math.floor(r()*spare.length)]]; info=items[a].ar+' ← أصبحت '+it.ar; disposeMesh(items[a].g); const m=kimItem(it.k); const c=KIM_CELLS[a]; m.position.set(c[0],-0.01,c[1]); g.add(m); items[a]={g:m,k:it.k,ar:it.ar}; }
+    setActs();
+  }
+  function toAnswer(t){ applyChange(); state='answer'; cover(false); tAns=t; const q={missing:'ما المفقود؟ انقر مكانه',swap:'أي أداتين تبادلتا المكان؟',change:'ما الأداة الجديدة؟'}[data.mode]; show(q,'أسرع إجابة تحسب نقاطًا أكثر'); g.userData.status='ما الذي تغيّر؟'; }
+  function finish(t){
+    state='result'; const secs=((t-tAns)/1000).toFixed(1);
+    const ok = picks.length===answer.length && answer.every(a=>picks.includes(a));
+    marks.forEach(m=>m.visible=false);
+    if(ok) answer.forEach((a,i)=>{ const c=KIM_CELLS[a]; marks[i].position.set(c[0],-0.006,c[1]); marks[i].visible=true; });
+    else { picks.forEach((p,i)=>{ const c=KIM_CELLS[p]; marks[2+i].position.set(c[0],-0.006,c[1]); marks[2+i].visible=true; }); answer.forEach((a,i)=>{ const c=KIM_CELLS[a]; marks[4+i].position.set(c[0],-0.005,c[1]); marks[4+i].visible=true; }); }
+    g.userData.emit(ok?'ok':'bad'); g.userData.status=(ok?'✓ صحيح في ':'✗ خطأ · ')+secs+' ث';
+    show(info, 'اضغط «ابدأ» لمحاولة جديدة'); setStartVisible(true);
+  }
+  g.userData.click=(id,remote)=>{
+    const t=performance.now();
+    if(id==='start'){ if(state==='idle'||state==='result'){ g.userData.emit('tap'); begin(t); } return; }
+    if(id.indexOf('cell:')!==0) return; const cell=+id.slice(5);
+    if(remote && (state==='observe'||state==='cover')) toAnswer(t);
+    if(state!=='answer') return;
+    if(picks.includes(cell)) return; picks.push(cell); g.userData.emit('tap');
+    if(data.mode==='swap' && picks.length<2){ const c=KIM_CELLS[cell]; marks[4].position.set(c[0],-0.005,c[1]); marks[4].visible=true; g.userData.status='اختر الأداة الثانية'; return; }
+    finish(t);
+  };
+  g.userData.tick=(t)=>{
+    clothY+=(clothTarget-clothY)*0.12; clothOp+=(clothOpT-clothOp)*0.12; cloth.position.y=clothY; cloth.material.opacity=Math.max(0,Math.min(1,clothOp)); cloth.visible=clothOp>0.02;
+    const sag=Math.max(0,1-(clothY-0.03)/0.39); cloth.scale.set(1,1,1); cloth.rotation.z=Math.sin(t*0.002)*0.02*(1-sag);
+    if(state==='observe'){
+      const left=Math.ceil((tEnd-t)/1000);
+      if(left!==lastSec){ lastSec=left; show(String(Math.max(0,left)),'تذكّر الأدوات ومواقعها'); g.userData.status='تذكّر: '+Math.max(0,left)+' ث'; if(left<=3 && left>0) g.userData.emit('tap'); }
+      if(t>=tEnd){ state='cover'; cover(true); tEnd=t+2200; show('…','الغطاء ينزل'); g.userData.status='استعد'; }
+    } else if(state==='cover' && t>=tEnd){ toAnswer(t); }
+    marks.forEach(m=>{ if(m.visible) m.scale.setScalar(1+0.06*Math.sin(t/160)); });
+  };
+  return g;
+}
+function buildModel(type){ return type==='terrain'?buildTerrain(): type==='compass'?buildCompass(): type==='extinguisher'?buildExtinguisher(): type==='rifle'?buildRifle(): type==='figure'?buildFigure(): type==='sight'?buildSight(): type==='aid'?buildAid(): type==='squad'?buildSquad(): type==='shadow'?buildShadow(): type==='nightsky'?buildNight(): type==='sentence'?buildSentence(): type==='label'?buildLabel(): type==='paths'?buildPaths(): type==='town'?buildTown(): type==='kim'?buildKim(): new THREE.Group(); }
 
 function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function labelTexture(text, hl){
@@ -1320,7 +1426,7 @@ function makeRig(parent){
     const st=(rig.curQuiz?'':M.userData.status)||''; if(st!==rig.status){ rig.status=st; if(rig.onStatus) rig.onStatus(st); }
     if(M.userData.needle) M.userData.needle.rotation.y=Math.sin(t/900)*0.06;
   };
-  rig.act = function(id){ if(rig.model && rig.model.userData.click){ rig.model.userData.click(id); rig.meshes=[]; rig.model.traverse(c=>{ if(c.isMesh) rig.meshes.push(c); }); } };
+  rig.act = function(id,remote){ if(rig.model && rig.model.userData.click){ rig.model.userData.click(id,remote); rig.meshes=[]; rig.model.traverse(c=>{ if(c.isMesh) rig.meshes.push(c); }); } };
   rig.reveal = function(){ rig.hs.forEach(h=>{ h.sp.visible=true; h.line.visible=true; }); };
   rig.setHL = function(i){ rig.hs.forEach((h,k)=>{ const on=k===i; h.sp.material.map=h.tex[on?1:0]; h.sp.material.needsUpdate=true; h.dot.scale.setScalar(on?1.8:1); }); };
   return rig;
@@ -1505,6 +1611,7 @@ function startBoard(){
       else if(sceneNames(sl.model)){ const NM=sceneNames(sl.model); xo.className='field xopt'; xo.innerHTML='<label for="so'+k+'">المشهد</label><select id="so'+k+'"></select>'; const ps=xo.querySelector('select'); Object.keys(NM).forEach(key=>{ const o=document.createElement('option'); o.value=key; o.textContent=NM[key]; ps.appendChild(o); }); ps.value=NM[sl.pose]?sl.pose:Object.keys(NM)[0]; sl.pose=ps.value; ps.addEventListener('change',()=>sl.pose=ps.value); }
       if(sl.model==='sentence'){ sl.data=sl.data||{words:['I','am','ready'],ar:'أنا جاهز'}; xo.className='field xopt'; xo.innerHTML='<label for="se'+k+'">الجملة الإنجليزية الصحيحة</label><input id="se'+k+'" dir="ltr"><label for="sa'+k+'">المعنى بالعربي</label><input id="sa'+k+'">'; const a=xo.querySelector('#se'+k), b=xo.querySelector('#sa'+k); a.value=(sl.data.words||[]).join(' '); b.value=sl.data.ar||''; a.addEventListener('input',()=>sl.data.words=a.value.trim().split(/\s+/).filter(Boolean)); b.addEventListener('input',()=>sl.data.ar=b.value); }
       else if(sl.model==='paths'){ sl.data=sl.data||{rounds:[]}; xo.className='field xopt'; xo.innerHTML='<label for="pr'+k+'">الجولات: الكلمة العربية | الخيارات، وضع * قبل الصحيح</label><textarea id="pr'+k+'" dir="rtl" placeholder="سيارة | Cat, *Car, Card"></textarea>'; const ta=xo.querySelector('textarea'); ta.value=(sl.data.rounds||[]).map(R=>R.ar+' | '+R.opts.map((o,j)=>(j===R.a?'*':'')+o).join(', ')).join('\n'); ta.addEventListener('input',()=>{ sl.data.rounds=ta.value.split('\n').map(l=>{ const [ar,ops]=l.split('|'); if(!ops) return null; const arr=ops.split(',').map(x=>x.trim()).filter(Boolean).slice(0,3); const a=Math.max(0,arr.findIndex(x=>x[0]==='*')); return {ar:ar.trim(), opts:arr.map(x=>x.replace(/^\*/,'')), a}; }).filter(Boolean); }); }
+      else if(sl.model==='kim'){ sl.data=sl.data||{mode:'missing',seed:'u',time:12}; if(!sl.data.seed) sl.data.seed='u'+k; xo.className='field xopt'; xo.innerHTML='<label for="km'+k+'">نوع الجولة</label><select id="km'+k+'"><option value="view">عرض فقط</option><option value="missing">ما المفقود؟</option><option value="swap">أي أداتين تبادلتا المكان؟</option><option value="change">ما الذي تبدّل؟</option></select><label for="kt'+k+'">وقت الملاحظة (ثوانٍ)</label><input id="kt'+k+'" type="number" min="3" max="60">'; const ms=xo.querySelector('select'), ti=xo.querySelector('input'); ms.value=sl.data.mode||'missing'; ti.value=sl.data.time||12; ms.addEventListener('change',()=>sl.data.mode=ms.value); ti.addEventListener('input',()=>sl.data.time=Math.max(3,Math.min(60,+ti.value||12))); }
       else if(sl.model==='town'){ sl.data=sl.data||{rounds:[]}; xo.className='field xopt'; xo.innerHTML='<label for="tw'+k+'">الأهداف: اسم المبنى | التعليمات بالإنجليزية | المعنى بالعربي</label><textarea id="tw'+k+'" placeholder="Hospital | Go to the hospital. | اذهب إلى المستشفى"></textarea><span style="color:var(--mute);font-size:13px">المباني: School, Bank, Hospital, Park, Mosque, Hotel, Police, Market, Post Office</span>'; const ta=xo.querySelector('textarea'); ta.value=(sl.data.rounds||[]).map(R=>[R.target,R.en,R.ar].join(' | ')).join('\n'); ta.addEventListener('input',()=>{ sl.data.rounds=ta.value.split('\n').map(l=>{ const p=l.split('|').map(x=>x.trim()); return p[0]?{target:p[0],en:p[1]||'',ar:p[2]||''}:null; }).filter(Boolean); }); }
       const qo=c.querySelector('.qopt'), qk=sl.quiz?sl.quiz.kind:'none';
       qo.innerHTML='<div class="field"><label for="sk'+k+'">نوع الخطوة</label><select id="sk'+k+'"><option value="none">شرح</option><option value="choice">سؤال اختيار من متعدد</option><option value="find">سؤال: أشر إلى الجزء</option></select></div>';
@@ -1589,7 +1696,7 @@ function startBoard(){
     else if(m.t==='rot' && Array.isArray(m.q) && !drag){ rig.target.fromArray(m.q); }
     else if(m.t==='exp'){ rig.exp=m.v?1:0; $('#bExplode').textContent=rig.exp?'تركيب':'تفكيك'; }
     else if(m.t==='ans' && typeof m.i==='number'){ boardAnswer(m.i,m.pick,true); }
-    else if(m.t==='act' && typeof m.id==='string'){ rig.act(m.id); }
+    else if(m.t==='act' && typeof m.id==='string'){ rig.act(m.id,true); }
     else if(m.t==='actreset'){ setSlide(S.i,true); }
     else if(m.t==='qreset'){ S.ans={}; setSlide(S.i,true); }
     else if(m.t==='ptr'){
@@ -1861,7 +1968,7 @@ function startHeadset(){
   Link.onMsg=(m)=>{
     if(m.t==='lesson' && validLesson(m.lesson)){ S.lesson=normalizeLesson(m.lesson); S.ans={}; rig.type=null; setSlide(typeof m.i==='number'?m.i:S.i,true); }
     else if(m.t==='ans' && typeof m.i==='number'){ hsAnswer(m.i,m.pick,true); }
-    else if(m.t==='act' && typeof m.id==='string'){ rig.act(m.id); }
+    else if(m.t==='act' && typeof m.id==='string'){ rig.act(m.id,true); }
     else if(m.t==='actreset'){ setSlide(S.i,true); }
     else if(m.t==='qreset'){ S.ans={}; setSlide(S.i,true); }
     else if(m.t==='slide'){ setSlide(m.i,true); }
